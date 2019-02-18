@@ -5,11 +5,13 @@ from flask import send_from_directory
 from pathlib import Path
 
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
+RESPONSE_FOLDER = Path.cwd() / 'response/'
 ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
 app.secret_key = b'MBWUdbxX;>]vrTL'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['RESPONSE_FOLDER'] = RESPONSE_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -34,8 +36,9 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
+            return send_from_directory(app.config['RESPONSE_FOLDER'],
+                               'van_gogh.jpg')
+
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -45,6 +48,10 @@ def upload_file():
       <input type=submit value=Upload>
     </form>
     '''
+
+# Leaving this in for now to display how to do redirects:
+# return redirect(url_for('uploaded_file',
+            #                        filename=filename))
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
