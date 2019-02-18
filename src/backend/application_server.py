@@ -1,13 +1,14 @@
 import os
-from flask import Flask, flash, request, redirect, url_for
+from flask import Flask, flash, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from pathlib import Path
 
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
+app.secret_key = b'MBWUdbxX;>]vrTL'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -27,6 +28,9 @@ def upload_file():
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
+
+        # TODO Lorenz: Cover case where file type is not allowed
+        # TODO Lorenz: Enforce max file size limitation
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
