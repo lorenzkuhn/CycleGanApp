@@ -1,23 +1,25 @@
-FROM python:3.7.2-alpine
+FROM continuumio/miniconda3
 
-RUN adduser -D cyclegan
+RUN adduser --disabled-password cyclegan
 
 WORKDIR /home/cyclegan
 
-COPY env_requirements.yml env_requirements.yml
-RUN python -m venv venv
-RUN venv/bin/pip install -r requirements.txt
-RUN venv/bin/pip install gunicorn
+COPY env_requirements_linux.yml env_requirements_linux.yml 
+RUN conda update -y conda
+RUN conda update -y --all
+RUN conda env create -f env_requirements_linux.yml
+RUN conda install -y gunicorn
+RUN conda install Flask
 
-COPY app app
-COPY migrations migrations
-COPY microblog.py config.py boot.sh ./
+COPY backend/application_server.py boot.sh ./
 RUN chmod +x boot.sh
 
-ENV FLASK_APP microblog.py
+ENV FLASK_APP application_server.py
 
-RUN chown -R microblog:microblog ./
-USER microblog
+RUN chown -R cyclegan:cyclegan ./
+USER cyclegan
 
+RUN echo "source activate cycleGAN" > ~/.bashrc
+ENV PATH /opt/conda/envs/env/bin:$PATH
 EXPOSE 5000
 ENTRYPOINT ["./boot.sh"]
