@@ -14,3 +14,11 @@ To update an existing environment if the environment file changes:
 1. `source deactivate`
 2. `conda env update -f env_requirements.yml`
 3. `source activate env_name`
+
+### Running the Flask app
+
+In the folder of the flask app:
+```
+$ export FLASK_APP=hello.py
+$ flask run
+```

@@ -35,9 +35,11 @@ def upload_file_o():
 
         # TODO Lorenz: Cover case where file type is not allowed
         # TODO Lorenz: Enforce max file size limitation
+        # TODO all: Decide whether we actually want to store uploaded
+        # and transformed files.
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return send_from_directory(app.config['RESPONSE_FOLDER'],
                                'van_gogh.jpg')
 
