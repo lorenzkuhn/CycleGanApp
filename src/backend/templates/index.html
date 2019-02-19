@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>The Cycle-GAN App</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <!--[if lt IE 9]>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <header>
+      <h1>The Cycle-GAN App</h1>
+    </header>
+    <div>
+      <aside>
+        <form id='upload_form' action='http://127.0.0.1:5000/' enctype='multipart/form-data' method='post'>
+          <div>
+            <input id='file_input' type="file" name="file" accept="image/*" required="true">
+            <button type="button">Upload Image</button>
+          </div>
+        </form>
+      </aside>
+      <main>
+        <section>
+            <img id='inferred_image'><img>
+        </section>
+      </main>
+    </div>
+    <script>
+        initialize();
+    
+        function upload(file) {
+          const url = 'http://127.0.0.1:5000/';
+          const data = new FormData()
+          data.append('file', file)
+          fetch(url, {
+            method: 'POST',
+            body: data
+          }).then(response => {
+            console.log('obtained response');
+            console.log(response);
+            return response.blob();
+          }).then(blob => {
+            let image = document.getElementById('inferred_image');
+            const objectUrl = URL.createObjectURL(blob);
+            console.log(objectUrl);
+            image.src = objectUrl;
+          });
+        }
+    
+        // sets up the app logic, declares required variables, contains all the other functions
+        function initialize() {
+          const input = document.getElementById('file_input');
+          input.addEventListener('change', () => upload(input.files[0]), false)
+        }
+    
+      </script>
+  </body>
+</html>

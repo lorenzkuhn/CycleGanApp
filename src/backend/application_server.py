@@ -1,5 +1,5 @@
 import os
-from flask import Flask, flash, request, redirect, url_for, session
+from flask import Flask, flash, request, redirect, url_for, session, render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from pathlib import Path
@@ -17,8 +17,10 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
+@app.route('/o', methods=['GET', 'POST'])
+def upload_file_o():
+    app.logger.info(request)
+    app.logger.info(request.files)
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -48,6 +50,33 @@ def upload_file():
       <input type=submit value=Upload>
     </form>
     '''
+
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    app.logger.info(request)
+    app.logger.info(request.files)
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            app.logger.info('no file part')
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+
+        # TODO Lorenz: Cover case where file type is not allowed
+        # TODO Lorenz: Enforce max file size limitation
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename, as_attachment=True)
+
+    return render_template('index.html')
 
 # Leaving this in for now to display how to do redirects:
 # return redirect(url_for('uploaded_file',
