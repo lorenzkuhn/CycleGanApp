@@ -5,13 +5,16 @@ from flask import send_from_directory
 from pathlib import Path
 
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
+Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
 RESPONSE_FOLDER = Path.cwd() / 'response/'
+Path(RESPONSE_FOLDER).mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
 app.secret_key = b'MBWUdbxX;>]vrTL'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESPONSE_FOLDER'] = RESPONSE_FOLDER
+
 
 def allowed_file(filename):
     return '.' in filename and \
