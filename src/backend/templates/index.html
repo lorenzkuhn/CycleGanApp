@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>The Cycle-GAN App</title>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <!--[if lt IE 9]>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
     <![endif]-->
@@ -14,48 +15,65 @@
       <h1>The Cycle-GAN App</h1>
     </header>
     <div>
-      <aside>
+      <left>
+        <section>
+          <img id='uploaded_image' height='256' width='256'>
+        </section>
         <form id='upload_form' action='' enctype='multipart/form-data' method='post'>
           <div>
             <input id='file_input' type="file" name="file" accept="image/*" required="true">
-          
           </div>
         </form>
-      </aside>
-      <main>
+        <p><strong>Status: </strong></p><p id='status_text'>Please select image to transform.</p>
+      </left>
+      <right>
         <section>
-            <img id='inferred_image'><img>
+            <img id='inferred_image' height='256' width='256'>
         </section>
-      </main>
+      </right>
     </div>
     <script>
-        initialize();
+        function handleErrors(response) {
+          if (!response.ok) {
+              throw Error(response.statusText);
+          }
+          return response;
+        }
     
         function upload(file) {
-          const url = '';
-          const data = new FormData()
-          data.append('file', file)
-          fetch(url, {
-            method: 'POST',
-            body: data
-          }).then(response => {
-            console.log('obtained response');
-            console.log(response);
+          let uploaded_image = document.getElementById('uploaded_image');
+          let status_text = document.getElementById('status_text')
+          uploaded_image.src = URL.createObjectURL(file);
+          const url = '/';
+          const data = new FormData();
+          data.append('file', file);
+          fetch(url, { method: 'POST',body: data})
+          .then(handleErrors)
+          .then(response => {
+            if(!response.ok) { 
+              throw response; 
+            }
             return response.blob();
-          }).then(blob => {
+          })
+          .then(blob => {
             let image = document.getElementById('inferred_image');
             const objectUrl = URL.createObjectURL(blob);
-            console.log(objectUrl);
             image.src = objectUrl;
+            status_text.innerHTML = 'Here you go. Feel free to upload another image.'
+          })
+          .catch(function(error) {
+            console.log("error occurred");
+            console.log(error);
+            status_text.innerHTML = error;
           });
         }
     
         // sets up the app logic, declares required variables, contains all the other functions
         function initialize() {
           const input = document.getElementById('file_input');
-          input.addEventListener('change', () => upload(input.files[0]), false)
+          input.addEventListener('change', () => upload(input.files[0]), false);
         }
-    
+        initialize();    
       </script>
   </body>
 </html>
