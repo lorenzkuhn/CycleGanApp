@@ -1,4 +1,4 @@
-import os
+import os, logging
 from flask import Flask, flash, request, redirect, url_for, session, render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
@@ -58,3 +58,8 @@ def upload_file():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)

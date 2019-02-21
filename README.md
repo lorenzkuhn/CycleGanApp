@@ -1,8 +1,13 @@
 # CycleGanApp
-## Deployment
+## Deployment using Docker Containers
 We used digitalocean to deploy our app in a docker container.
 1. Run this command from within the 'src' directory:  docker build -t application_server:latest .
 2. Start the docker container with the following command: docker run --name application_server -d -p 80:2375 --rm application_server:latest
+
+### Debugging Docker Container
+Given the container is currently running, follow these steps:
+1. Get id of container using command 'docker ps'
+2. docker exec -it `<docker id>` /bin/bash
 
 ### Using the Conda Environment
 
