@@ -7,7 +7,7 @@ We used digitalocean to deploy our app in a docker container.
 ### Debugging Docker Container
 Given the container is currently running, follow these steps:
 1. Get id of container using command 'docker ps'
-2. docker exec -it <docker id> /bin/bash
+2. docker exec -it `<docker id>` /bin/bash
 
 ### Using the Conda Environment
 
