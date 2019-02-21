@@ -5,9 +5,11 @@ RUN adduser --disabled-password cyclegan
 WORKDIR /home/cyclegan
 
 COPY env_requirements_linux.yml env_requirements_linux.yml 
+COPY backend/templates/index.html templates/index.html
+COPY backend/uploads/placeholder.txt uploads/placeholder.txt
 RUN conda update -y conda
 RUN conda update -y --all
-RUN conda env create -f env_requirements_linux.yml
+#RUN conda env create -f env_requirements_linux.yml
 RUN conda config --add channels menpo 
 RUN conda config --add channels anaconda
 RUN conda config --add channels conda-forge
