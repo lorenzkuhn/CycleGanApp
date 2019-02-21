@@ -5,7 +5,8 @@ RUN adduser --disabled-password cyclegan
 WORKDIR /home/cyclegan
 
 COPY backend/templates/index.html templates/index.html
-COPY backend/uploads/placeholder.txt uploads/placeholder.txt
+COPY backend/static/styles/style.css static/styles/style.css
+COPY backend/static/favicon.ico static/favicon.ico
 RUN conda update -y conda
 RUN conda update -y --all
 RUN conda config --add channels menpo 

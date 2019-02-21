@@ -1,4 +1,9 @@
 # CycleGanApp
+## Deployment
+We used digitalocean to deploy our app in a docker container.
+1. Run this command from within the 'src' directory:  docker build -t application_server:latest .
+2. Start the docker container with the following command: docker run --name application_server -d -p 80:2375 --rm application_server:latest
+
 ### Using the Conda Environment
 
 To create the environment file:
