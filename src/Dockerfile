@@ -4,12 +4,10 @@ RUN adduser --disabled-password cyclegan
 
 WORKDIR /home/cyclegan
 
-COPY env_requirements_linux.yml env_requirements_linux.yml 
 COPY backend/templates/index.html templates/index.html
 COPY backend/uploads/placeholder.txt uploads/placeholder.txt
 RUN conda update -y conda
 RUN conda update -y --all
-#RUN conda env create -f env_requirements_linux.yml
 RUN conda config --add channels menpo 
 RUN conda config --add channels anaconda
 RUN conda config --add channels conda-forge
@@ -25,7 +23,5 @@ ENV FLASK_APP application_server.py
 RUN chown -R cyclegan:cyclegan ./
 USER cyclegan
 
-RUN echo "source activate cycleGAN" > ~/.bashrc
-ENV PATH /opt/conda/envs/cycleGAN/bin:$PATH
 EXPOSE 80
 ENTRYPOINT ["./boot.sh"]
