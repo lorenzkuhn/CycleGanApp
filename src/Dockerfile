@@ -7,6 +7,7 @@ WORKDIR /home/cyclegan
 COPY env_requirements_linux.yml env_requirements_linux.yml 
 COPY backend/templates/index.html templates/index.html
 COPY backend/uploads/placeholder.txt uploads/placeholder.txt
+COPY backend/static/styles/style.css static/styles/style.css
 RUN conda update -y conda
 RUN conda update -y --all
 #RUN conda env create -f env_requirements_linux.yml
