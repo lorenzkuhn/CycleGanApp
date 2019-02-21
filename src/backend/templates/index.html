@@ -15,10 +15,10 @@
     </header>
     <div>
       <aside>
-        <form id='upload_form' action='http://127.0.0.1:5000/' enctype='multipart/form-data' method='post'>
+        <form id='upload_form' action='' enctype='multipart/form-data' method='post'>
           <div>
             <input id='file_input' type="file" name="file" accept="image/*" required="true">
-            <button type="button">Upload Image</button>
+          
           </div>
         </form>
       </aside>
@@ -32,7 +32,7 @@
         initialize();
     
         function upload(file) {
-          const url = 'http://127.0.0.1:5000/';
+          const url = '';
           const data = new FormData()
           data.append('file', file)
           fetch(url, {

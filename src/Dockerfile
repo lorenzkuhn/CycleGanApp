@@ -27,5 +27,5 @@ USER cyclegan
 
 RUN echo "source activate cycleGAN" > ~/.bashrc
 ENV PATH /opt/conda/envs/cycleGAN/bin:$PATH
-EXPOSE 5000
+EXPOSE 2375
 ENTRYPOINT ["./boot.sh"]
