@@ -4,18 +4,19 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
-import gan
+from gan import Generator
 
-MODEL_PATH = 'awsm_model'
+MODEL_PATH = 'gpu_model'
 VALIDATION_DATA_PATH = 'test_A'
 
 SAVE_IMAGE = True
 DISPLAY_IMAGE = False
 N_VALIDATION_IMAGES = 3
 
-model = gan.Generator(9)
-model.load_state_dict(torch.load(MODEL_PATH))
-image_size = (128, 128)
+model = Generator(9)
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+image_size = (256, 256)
 transform = transforms.Compose([
     transforms.Resize(image_size),
     transforms.CenterCrop(image_size),
