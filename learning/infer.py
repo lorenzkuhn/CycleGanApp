@@ -4,7 +4,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
-from gan import Generator
+from modules import Generator
 
 MODEL_PATH = 'gpu_model'
 VALIDATION_DATA_PATH = 'test_A'
