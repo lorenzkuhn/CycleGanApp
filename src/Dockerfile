@@ -8,6 +8,8 @@ COPY backend/templates/index.html templates/index.html
 COPY backend/static/styles/style.css static/styles/style.css
 COPY backend/static/favicon.ico static/favicon.ico
 COPY onenv_requirements.yml environment.yml
+COPY ../learning/awsm_model awsm_model
+COPY ../learning/gan.py gan.py
 RUN conda update -y conda
 RUN conda update -y --all
 RUN conda env create -f environment.yml
