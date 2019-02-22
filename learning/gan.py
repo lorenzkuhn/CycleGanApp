@@ -5,9 +5,9 @@ import torchvision
 import torchvision.transforms as transforms
 
 class CustomLoss(nn.Module):
-
     def forward(self, data_labels, synthesis_labels):
-        target = torch.ones(1).expand_as(synthesis_labels)
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        target = torch.ones(1).expand_as(synthesis_labels).to(device)
         loss = (data_labels.pow(2).sum() +
                 (target - synthesis_labels).pow(2).sum()) /\
                 (data_labels.numel() + synthesis_labels.numel())
@@ -54,8 +54,8 @@ class Generator(nn.Module):
                                padding=1, output_padding=1),
             nn.InstanceNorm2d(128),
             nn.ReLU(True),
-            nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1,
-                               output_padding=1),
+            nn.ConvTranspose2d(128, 64, 3, stride=2,
+                               padding=1, output_padding=1),
             nn.InstanceNorm2d(64),
             nn.ReLU(True),
             nn.ReflectionPad2d(3),
@@ -70,7 +70,9 @@ class Generator(nn.Module):
         return self.model(x)
 
     def sample(self, data_loader):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         batch, _ = next(iter(data_loader))
+        batch = batch.to(device)
         return self.forward(batch)
 
 
@@ -106,7 +108,9 @@ class Discriminator(nn.Module):
         return self.model(x)
 
 def sample_from_data(data_loader):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     batch, _ = next(iter(data_loader))
+    batch = batch.to(device)
     return batch
 
 def get_labels(data_loader, generator, discriminator):
@@ -122,20 +126,22 @@ def init_weights(m):
         m.weight.data.normal_(0.0, 0.02)
 
 def log(loss):
-    with open('log_rewrite.csv', 'a') as log_file:
+    with open('log_new2.csv', 'a') as log_file:
         log_file.write(str(loss) + '\n')
 
 def train():
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(7)
     train_data_path = 'train_A'
     n_residual_blocks = 9
     discriminator = Discriminator()
+    discriminator = discriminator.to(device)
     generator = Generator(n_residual_blocks)
+    generator = generator.to(device)
     generator.apply(init_weights)
     discriminator.apply(init_weights)
-    custom_loss = CustomLoss()
-    discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=0.01)
-    generator_optimizer = optim.Adam(generator.parameters(), lr=0.01)
+    discriminator_optimizer = optim.Adam(discriminator.parameters(), lr=0.002)
+    generator_optimizer = optim.Adam(generator.parameters(), lr=0.002)
     batchsize = 2
     n_epochs = 100
     n_discriminator_steps = 1
@@ -150,8 +156,9 @@ def train():
     train_data_loader = torch.utils.data.DataLoader(
         train_data, batch_size=batchsize, shuffle=True, num_workers=4)
 
-    loss_function = nn.MSELoss(reduction='elementwise_mean')
+    loss_function = nn.MSELoss(reduction='elementwise_mean').to(device)
     custom_loss_function = CustomLoss()
+    custom_loss_function = custom_loss_function.to(device)
     for epoch_index in range(n_epochs):
         for _ in range(n_discriminator_steps):
             discriminator_optimizer.zero_grad()
@@ -159,8 +166,8 @@ def train():
                 train_data_loader, generator, discriminator)
 
             # Maximizing loss function - hence inverting labels.
-            data_targets = torch.ones(1).expand_as(data_labels)
-            synthesis_targets = torch.zeros(1).expand_as(synthesis_labels)
+            data_targets = torch.ones(1).expand_as(data_labels).to(device)
+            synthesis_targets = torch.zeros(1).expand_as(synthesis_labels).to(device)
 
             loss = loss_function(data_labels, data_targets) +\
                 loss_function(synthesis_labels, synthesis_targets)
@@ -175,7 +182,7 @@ def train():
         data_labels, synthesis_labels = get_labels(
             train_data_loader, generator, discriminator)
 
-        synthesis_targets = torch.ones(1).expand_as(synthesis_labels)
+        synthesis_targets = torch.ones(1).expand_as(synthesis_labels).to(device)
         loss = loss_function(synthesis_labels, synthesis_targets)
         loss.backward()
         generator_optimizer.step()
@@ -184,7 +191,7 @@ def train():
         log(custom_loss.item())
         # log(epoch_index)
 
-    torch.save(generator.state_dict(), 'awsm_model')
+    torch.save(generator.state_dict(), 'awsm_model_2')
     # dummy_input = torch.randn(batchsize, 3, 128, 128)
     # torch.onnx.export(generator, dummy_input, 'generator.onnx')
 
