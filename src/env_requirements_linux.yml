@@ -5,6 +5,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - gunicorn
   - anaconda=custom=py37_0
   - ca-certificates=2019.1.23
   - certifi=2018.11.29
