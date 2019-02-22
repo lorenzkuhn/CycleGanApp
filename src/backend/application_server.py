@@ -1,19 +1,21 @@
-import os, logging
+import os, logging, io
 from flask import Flask, flash, request, redirect, url_for, session, render_template
 from werkzeug.utils import secure_filename
-from flask import send_from_directory
+from flask import send_from_directory, send_file
 from pathlib import Path
 from gan import Generator
 from PIL import Image
 import torch
+import torchvision
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
+import numpy as np
 
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
 RESPONSE_FOLDER = Path.cwd() / 'response/'
 Path(RESPONSE_FOLDER).mkdir(exist_ok=True)
-ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])
+ALLOWED_EXTENSIONS = set(['bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'])
 
 app = Flask(__name__)
 app.secret_key = b'MBWUdbxX;>]vrTL'
@@ -63,18 +65,41 @@ def upload_file():
         # TODO Lorenz: Enforce max file size limitation
         if rcvd_file and allowed_file(rcvd_file.filename):
             filename = secure_filename(rcvd_file.filename)
-            uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'tmp', filename)
             app.logger.info("received file {}".format(uploaded_file_path))
-            rcvd_file.save(uploaded_file_path)
-            prediction = model(transform(Image.open(uploaded_file_path)).unsqueeze(0))
+            #rcvd_file.save(uploaded_file_path)
+            img = Image.open(rcvd_file)
+            img = img.convert('RGB')
+            app.logger.info('created image {}'.format(img))
+            prediction = model(transform(img).unsqueeze(0))
             filename_pred = 'prediction_{}.png'.format(filename.split('.')[0])
 
             app.logger.info("predicted file {}".format(filename_pred))
             save_image(prediction, os.path.join(
                 app.config['RESPONSE_FOLDER'], filename_pred) , normalize=True)
-
             return send_from_directory(app.config['RESPONSE_FOLDER'],
                                filename_pred)
+            '''data = prediction.data.numpy()
+            new_img = transforms.ToPILImage(mode='RGB')(data)
+            np_image = np.squeeze(prediction.data.numpy(), axis=0)
+            np_image = np.transpose(np_image, (1, 2, 0))
+            for j in range(3):
+                min_value = np.min(np_image[:, :, j])
+                max_value = np.max(np_image[:, :, j])
+                if min_value == max_value:
+                    print('channel: ' + str(j) + ' ; min: ' + str(min_value) +
+                        ' ; max: ' + str(max_value))
+                    np_image[:, :, j] = .5
+                np_image[:, :, j] = (np_image[:, :, j] - min_value) /\
+                    (max_value - min_value)
+            new_img = Image.fromarray(np_image, 'RGB')
+            img_byte_arr = io.BytesIO()
+            new_img.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
+            return send_file(io.BytesIO(img_byte_arr),
+                     attachment_filename='prediction.png',
+                     mimetype='image/png')'''
+            
 
     return render_template('index.html')
 
@@ -91,4 +116,4 @@ if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
-    init_inference('awsm_model')
+    init_inference('gpu_model')
