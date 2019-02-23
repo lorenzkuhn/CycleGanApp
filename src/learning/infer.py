@@ -2,7 +2,7 @@ import torch
 import torchvision
 from torchvision.utils import save_image
 import utils
-from modules import Generator
+from nn_modules import Generator
 
 MODEL_PATH = 'gpu_model'
 VALIDATION_DATA_PATH = 'test_A'

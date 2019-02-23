@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
-from modules import CycleGANLoss, Discriminator, Generator
+from nn_modules import CycleGANLoss, Discriminator, Generator
 import utils
 
 
