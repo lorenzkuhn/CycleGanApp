@@ -9,7 +9,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from flask import Flask, flash, request, redirect, url_for, session,\
-                  render_template
+                  render_template, send_from_directory
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from gan import Generator
