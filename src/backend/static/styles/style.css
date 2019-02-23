@@ -8,17 +8,15 @@ html {
 
 body {
   width: 800px;
-  margin: 0 auto;
 }
 
 /* Typography */
 
 h1 {
   /*font-family: 'Cherry Swash', cursive;*/
-  margin: 0;
-  text-align: center;
-  font-size: 5rem;
   background-size: 48px 48px;
+  font-size: 5rem;
+  text-align: center;
 }
 
 input, p {
@@ -28,9 +26,8 @@ input, p {
 /* block styling */
 
 header, left, right, footer {
-  padding: 20px;
   border: 2px solid rgb(100, 98, 98);
-  border-bottom: 0;
+  padding: 20px;
 }
 
 body > div {
@@ -38,31 +35,22 @@ body > div {
   display: flex;
 }
 
-left {
-  border-right: 2px solid rgb(100, 98, 98);
-  flex: 5;
-  display: flex;
-  flex-flow: column;
+img-container {
   align-items: stretch;
-}
-
-right {
   display: flex;
   flex: 5;
   flex-flow: column;
-  align-items: stretch;
 }
 
-left div {
+img-container div {
   margin-bottom: 20px;
 }
 
 input {
-  display: block;
   background: rgb(71, 70, 70);
   box-shadow: inset 1px 1px 1px white;
   color: rgb(0, 0, 0);
-  border: none;
+  display: block;
   padding: 5px;
   width: 201.5px;
 }
@@ -70,5 +58,4 @@ input {
 section img {
   background-color: rgba(126, 126, 126, 0.336);
   width: 100%;
-  bottom: 0px;
 }
