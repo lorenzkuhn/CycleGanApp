@@ -5,24 +5,21 @@ Module defining our flask application server.
 
 import os
 import logging
-import torch
-import torchvision
-import torchvision.transforms as transforms
-from flask import Flask, flash, request, redirect, url_for, session,\
-                  render_template, send_from_directory
-from werkzeug.utils import secure_filename
-from pathlib import Path
-from gan import Generator
 from PIL import Image
+from pathlib import Path
 import torch
 import torchvision.transforms as transforms
+from flask import Flask, flash, request, redirect, render_template,\
+                  send_from_directory
+from werkzeug.utils import secure_filename
+from gan import Generator
 from torchvision.utils import save_image
 
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
 RESPONSE_FOLDER = Path.cwd() / 'response/'
 Path(RESPONSE_FOLDER).mkdir(exist_ok=True)
-ALLOWED_EXTENSIONS = set(['bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'])
+ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
 
 app = Flask(__name__)
 app.secret_key = b'MBWUdbxX;>]vrTL'
@@ -31,6 +28,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESPONSE_FOLDER'] = RESPONSE_FOLDER
 model = Generator(9)
 transform = None
+
 
 def init_inference(model_path):
     """
@@ -94,18 +92,13 @@ def upload_file():
             prediction = model(transform(img).unsqueeze(0))
             filename_pred = 'prediction_{}.png'.format(filename.split('.')[0])
             save_image(prediction, 
-                       os.path.join(app.config['RESPONSE_FOLDER'], filename_pred), 
+                       os.path.join(app.config['RESPONSE_FOLDER'],
+                                    filename_pred),
                        normalize=True)
-            return send_from_directory(app.config['RESPONSE_FOLDER'], filename_pred)
 
-
-            app.logger.info("predicted file {}".format(filename_pred))
-            save_image(prediction, os.path.join(app.config['RESPONSE_FOLDER'],
-                                                filename_pred), normalize=True)
-            return send_from_directory(app.config['RESPONSE_FOLDER'],
-                                       filename_pred)
             '''
-            # attempt to create image object from output torch.Tensor, work in progress!
+            # attempt to create image object from output torch.
+            # Tensor, work in progress!
             data = prediction.data.numpy()            
             new_img = transforms.ToPILImage(mode='RGB')(data)
             np_image = np.squeeze(prediction.data.numpy(), axis=0)
@@ -126,6 +119,9 @@ def upload_file():
             return send_file(io.BytesIO(img_byte_arr),
                      attachment_filename='prediction.png',
                      mimetype='image/png')'''
+
+            return send_from_directory(app.config['RESPONSE_FOLDER'],
+                                       filename_pred)
 
     return render_template('index.html')
 
