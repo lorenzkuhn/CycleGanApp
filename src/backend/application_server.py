@@ -14,7 +14,7 @@ from flask import Flask, flash, request, redirect, render_template,\
 
 from nn_modules import Generator
 from torchvision.utils import save_image
-
+import utils
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
 RESPONSE_FOLDER = Path.cwd() / 'response/'
@@ -30,23 +30,22 @@ model = Generator(9)
 transform = None
 
 
-def init_inference(model_path):
+def load_model(model_path):
     """
     Loads model from file and initialises image transformation.
     :param model_path:
     :return:
     """
     global model
-    global transform
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.load_state_dict(torch.load(model_path, map_location=device))
+
+
+def load_transform_function():
+
+    global transform
     image_size = (256, 256)
-    transform = transforms.Compose([
-        transforms.Resize(image_size),
-        transforms.CenterCrop(image_size),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+    transform = utils.get_transform(image_size)
 
 
 def is_allowed_file(filename):
@@ -128,4 +127,5 @@ if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
-    init_inference('gpu_model')
+    load_model('gpu_model')
+    load_transform_function()
