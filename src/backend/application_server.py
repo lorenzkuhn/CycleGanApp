@@ -27,7 +27,7 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESPONSE_FOLDER'] = RESPONSE_FOLDER
 
-model = Generator(9)
+model = Generator(n_residual_blocks=9, use_dropout=False)
 transform = None
 
 
@@ -68,8 +68,8 @@ def upload_file():
     if request.method == 'GET':
         return render_template('index.html')
     else:   # POST request
-        # check if the post request has the file part
-        if 'file' not in request.files:
+        if ('file' not in request.files or 
+                (file in request.files and request.files['file'] is None)):
             app.logger.info('no file part')
             flash('No file part')
             return redirect(request.url)
@@ -105,15 +105,6 @@ def upload_file():
             new_img = transforms.ToPILImage(mode='RGB')(data)
             np_image = np.squeeze(prediction.data.numpy(), axis=0)
             np_image = np.transpose(np_image, (1, 2, 0))
-            for j in range(3):
-                min_value = np.min(np_image[:, :, j])
-                max_value = np.max(np_image[:, :, j])
-                if min_value == max_value:
-                    print('channel: ' + str(j) + ' ; min: ' + str(min_value) +
-                        ' ; max: ' + str(max_value))
-                    np_image[:, :, j] = .5
-                np_image[:, :, j] = (np_image[:, :, j] - min_value) /\
-                    (max_value - min_value)
             new_img = Image.fromarray(np_image, 'RGB')
             img_byte_arr = io.BytesIO()
             new_img.save(img_byte_arr, format='PNG')

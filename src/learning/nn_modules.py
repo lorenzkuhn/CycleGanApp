@@ -39,7 +39,7 @@ class ResidualBlock(nn.Module):
                    nn.ReLU(inplace=True)]
         regularizer = [nn.Dropout(0.5)] if use_dropout else []
         block_2 = [nn.ReflectionPad2d(1),
-                   nn.Conv2d(n_channels, n_channels, kernel_size, padding=0
+                   nn.Conv2d(n_channels, n_channels, kernel_size, padding=0,
                              bias=False),
                    nn.InstanceNorm2d(n_channels)]
         modules = block_1 + regularizer + block_2
