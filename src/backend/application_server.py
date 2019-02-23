@@ -89,7 +89,7 @@ def upload_file():
             app.logger.info("received file {}".format(uploaded_file_path))
             img = Image.open(rcvd_file)
             img = img.convert('RGB')
-            app.logger.info('created image {}'.format(img))
+            app.logger.info('created image {}'.format(img.tostring()))
             prediction = model(transform(img).unsqueeze(0))
             filename_pred = 'prediction_{}.png'.format(filename.split('.')[0])
             save_image(prediction,
