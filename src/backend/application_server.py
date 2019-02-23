@@ -91,7 +91,8 @@ def upload_file():
             img = img.convert('RGB')
             app.logger.info('created image {}'.format(img.tostring()))
             prediction = model(transform(img).unsqueeze(0))
-            filename_pred = 'prediction_{}.png'.format(filename.split('.')[0])
+            filename_pred =\
+                'prediction_{}.png'.format(filename.rsplit('.', 1)[0])
             save_image(prediction,
                        os.path.join(app.config['RESPONSE_FOLDER'],
                                     filename_pred),
