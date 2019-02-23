@@ -10,7 +10,7 @@ COPY backend/static/styles/style.css static/styles/style.css
 COPY backend/static/favicon.ico static/favicon.ico
 COPY environment.yml environment.yml
 COPY learning/gpu_model gpu_model
-COPY learning/gan.py gan.py
+COPY learning/nn_modules.py nn_modules.py
 RUN conda update -y conda
 RUN conda update -y --all
 RUN conda env create -f environment.yml
