@@ -1,12 +1,10 @@
 import os, logging, io
-from flask import Flask, flash, request, redirect, url_for, session, render_template
+from flask import Flask, flash, request, redirect, render_template, send_from_directory, send_file
 from werkzeug.utils import secure_filename
-from flask import send_from_directory, send_file
 from pathlib import Path
 from gan import Generator
 from PIL import Image
 import torch
-import torchvision
 import torchvision.transforms as transforms
 from torchvision.utils import save_image
 import numpy as np
@@ -36,7 +34,6 @@ def init_inference(model_path):
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    #validation_data = torchvision.datasets.ImageFolder(root=VALIDATION_DATA_PATH, transform=transform)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -44,10 +41,6 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    app.logger.info('upload_folder = {}'.format(app.config['UPLOAD_FOLDER']))
-    app.logger.info('response_folder = {}'.format(app.config['RESPONSE_FOLDER']))
-    app.logger.info(request)
-    app.logger.info(request.files)
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -67,19 +60,20 @@ def upload_file():
             filename = secure_filename(rcvd_file.filename)
             uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'tmp', filename)
             app.logger.info("received file {}".format(uploaded_file_path))
-            #rcvd_file.save(uploaded_file_path)
             img = Image.open(rcvd_file)
             img = img.convert('RGB')
             app.logger.info('created image {}'.format(img))
             prediction = model(transform(img).unsqueeze(0))
             filename_pred = 'prediction_{}.png'.format(filename.split('.')[0])
+            save_image(prediction, 
+                       os.path.join(app.config['RESPONSE_FOLDER'], filename_pred), 
+                       normalize=True)
+            return send_from_directory(app.config['RESPONSE_FOLDER'], filename_pred)
 
-            app.logger.info("predicted file {}".format(filename_pred))
-            save_image(prediction, os.path.join(
-                app.config['RESPONSE_FOLDER'], filename_pred) , normalize=True)
-            return send_from_directory(app.config['RESPONSE_FOLDER'],
-                               filename_pred)
-            '''data = prediction.data.numpy()
+            
+            '''
+            # attempt to create image object from output torch.Tensor, work in progress!
+            data = prediction.data.numpy()
             new_img = transforms.ToPILImage(mode='RGB')(data)
             np_image = np.squeeze(prediction.data.numpy(), axis=0)
             np_image = np.transpose(np_image, (1, 2, 0))
@@ -102,15 +96,6 @@ def upload_file():
             
 
     return render_template('index.html')
-
-# Leaving this in for now to display how to do redirects:
-# return redirect(url_for('uploaded_file',
-            #                        filename=filename))
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
