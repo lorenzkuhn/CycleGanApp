@@ -46,6 +46,6 @@ def get_target(real, inverted, shape, device):
     return torch.ones(shape).to(device)
 
 
-def log_loss(loss):
-    with open('log_loss.csv', 'a') as log_file:
-        log_file.write(str(loss) + '\n')
+def write_to_loss_logging(loss):
+    with open('loss.csv', 'a') as loss_file:
+        loss_file.write(str(loss) + '\n')

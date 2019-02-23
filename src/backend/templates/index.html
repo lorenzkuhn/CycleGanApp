@@ -14,7 +14,7 @@
       <h1>The Cycle-GAN App</h1>
     </header>
     <div>
-      <left>
+      <img-container>
         <section>
           <img id='uploaded_image' height='256' width='256'>
         </section>
@@ -24,12 +24,12 @@
           </div>
         </form>
         <div class='status_title'>Status: </div><div id='status_text'>Please select image to transform.</div>
-      </left>
-      <right>
+      </img-container>
+      <img-container>
         <section>
             <img id='inferred_image' height='256' width='256'>
         </section>
-      </right>
+      </img-container>
     </div>
     <script>
         function handleErrors(response) {
