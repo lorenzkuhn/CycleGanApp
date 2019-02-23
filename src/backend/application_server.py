@@ -1,15 +1,22 @@
-import os, logging, io
-from flask import Flask, flash, request, redirect, url_for, session, render_template
+"""
+Module defining our flask application server.
+"""
+
+import os
+import logging
+
+import torch
+import torchvision
+import torchvision.transforms as transforms
+from flask import Flask, flash, request, redirect, url_for, session,\
+                  render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory, send_file
 from pathlib import Path
 from gan import Generator
 from PIL import Image
-import torch
-import torchvision
-import torchvision.transforms as transforms
+
 from torchvision.utils import save_image
-import numpy as np
 
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
@@ -25,6 +32,11 @@ model = Generator(9)
 transform = None
 
 def init_inference(model_path):
+    """
+    Loads model from file and initialises image transformation.
+    :param model_path:
+    :return:
+    """
     global model
     global transform
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -36,14 +48,25 @@ def init_inference(model_path):
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    #validation_data = torchvision.datasets.ImageFolder(root=VALIDATION_DATA_PATH, transform=transform)
+
+
 
 def allowed_file(filename):
+    """
+    Given filename returns whether file is of allowed file type.
+    :param filename:
+    :return:
+    """
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    """
+    Handles upload of image.
+    :return:
+    """
     app.logger.info('upload_folder = {}'.format(app.config['UPLOAD_FOLDER']))
     app.logger.info('response_folder = {}'.format(app.config['RESPONSE_FOLDER']))
     app.logger.info(request)
@@ -65,7 +88,8 @@ def upload_file():
         # TODO Lorenz: Enforce max file size limitation
         if rcvd_file and allowed_file(rcvd_file.filename):
             filename = secure_filename(rcvd_file.filename)
-            uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'tmp', filename)
+            uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                              'tmp', filename)
             app.logger.info("received file {}".format(uploaded_file_path))
             #rcvd_file.save(uploaded_file_path)
             img = Image.open(rcvd_file)
@@ -75,10 +99,10 @@ def upload_file():
             filename_pred = 'prediction_{}.png'.format(filename.split('.')[0])
 
             app.logger.info("predicted file {}".format(filename_pred))
-            save_image(prediction, os.path.join(
-                app.config['RESPONSE_FOLDER'], filename_pred) , normalize=True)
+            save_image(prediction, os.path.join(app.config['RESPONSE_FOLDER'],
+                                                filename_pred), normalize=True)
             return send_from_directory(app.config['RESPONSE_FOLDER'],
-                               filename_pred)
+                                       filename_pred)
             '''data = prediction.data.numpy()
             new_img = transforms.ToPILImage(mode='RGB')(data)
             np_image = np.squeeze(prediction.data.numpy(), axis=0)
@@ -99,7 +123,6 @@ def upload_file():
             return send_file(io.BytesIO(img_byte_arr),
                      attachment_filename='prediction.png',
                      mimetype='image/png')'''
-            
 
     return render_template('index.html')
 
@@ -107,10 +130,12 @@ def upload_file():
 # return redirect(url_for('uploaded_file',
             #                        filename=filename))
 
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
