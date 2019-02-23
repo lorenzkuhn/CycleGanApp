@@ -15,7 +15,7 @@ def train():
     path_train_data_y = 'train_B'
     path_model_xy = 'cyclegan_gen_AB'
     path_model_yx = 'cyclegan_gen_BA'
-    batchsize = 5
+    batchsize = 1
     n_epochs = 250
     learning_rate = .002
     regularizer = 10
@@ -50,7 +50,7 @@ def train():
     train_data_y_loader = torch.utils.data.DataLoader(
         train_data_y, batch_size=batchsize, shuffle=True, num_workers=4)
 
-    mse = nn.MSELoss(reduction='elementwise_mean').to(device)
+    mse = nn.MSELoss(reduction='mean').to(device)
     loss_function = CycleGANLoss(regularizer, False, device)
 
     for epoch_index in range(n_epochs):

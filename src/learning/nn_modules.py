@@ -10,8 +10,8 @@ class CycleGANLoss(nn.Module):
         self.device = device
 
     def forward(self, data):
-        mse = nn.MSELoss(reduction='elementwise_mean').to(self.device)
-        l1norm = nn.L1Loss(reduction='elementwise_mean').to(self.device)
+        mse = nn.MSELoss(reduction='mean').to(self.device)
+        l1norm = nn.L1Loss(reduction='mean').to(self.device)
 
         batch_targets = utils.get_target(
             True, self.inverted, data.batch_x_predictions.size(), self.device)
