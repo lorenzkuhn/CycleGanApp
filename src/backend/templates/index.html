@@ -7,7 +7,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'UA-45266465-2');
     </script>
     <meta charset="utf-8">
@@ -18,7 +17,6 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
     <![endif]-->
   </head>
-
   <body>
     <header>
       <h1>The Cycle-GAN App</h1>
@@ -48,7 +46,7 @@
           }
           return response;
         }
-    
+        // uploads an image file to the server, fetches the inferred image and displays it 
         function upload(file) {
           let uploaded_image = document.getElementById('uploaded_image');
           let status_text = document.getElementById('status_text')
@@ -76,7 +74,6 @@
             status_text.innerHTML = error;
           });
         }
-    
         // sets up the app logic, declares required variables, contains all the other functions
         function initialize() {
           const input = document.getElementById('file_input');
