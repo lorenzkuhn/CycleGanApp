@@ -11,6 +11,7 @@ COPY backend/static/favicon.ico static/favicon.ico
 COPY environment.yml environment.yml
 COPY learning/gpu_model gpu_model
 COPY learning/nn_modules.py nn_modules.py
+COPY learning/utils.py utils.py
 RUN conda update -y conda
 RUN conda update -y --all
 RUN conda env create -f environment.yml
