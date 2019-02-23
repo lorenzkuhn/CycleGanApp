@@ -49,7 +49,7 @@ def init_inference(model_path):
     ])
 
 
-def allowed_file(filename):
+def is_allowed_file(filename):
     """
     Given filename returns whether file is of allowed file type.
     :param filename:
@@ -65,8 +65,9 @@ def upload_file():
     Handles upload of image.
     :return:
     """
-
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('index.html')
+    else:   # POST request
         # check if the post request has the file part
         if 'file' not in request.files:
             app.logger.info('no file part')
@@ -122,9 +123,6 @@ def upload_file():
 
             return send_from_directory(app.config['RESPONSE_FOLDER'],
                                        filename_pred)
-
-    return render_template('index.html')
-
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
