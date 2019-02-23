@@ -100,7 +100,7 @@ def upload_file():
             '''
             # attempt to create image object from output torch.
             # Tensor, work in progress!
-            data = prediction.data.numpy()            
+            data = prediction.data.numpy()
             new_img = transforms.ToPILImage(mode='RGB')(data)
             np_image = np.squeeze(prediction.data.numpy(), axis=0)
             np_image = np.transpose(np_image, (1, 2, 0))
