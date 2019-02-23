@@ -22,6 +22,7 @@ Path(RESPONSE_FOLDER).mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
 
 app = Flask(__name__)
+# Set limit on file size of uploaded files. 50 * 1024 * 1024 is 50 MB.
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESPONSE_FOLDER'] = RESPONSE_FOLDER
