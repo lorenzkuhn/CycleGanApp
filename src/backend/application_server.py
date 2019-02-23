@@ -82,7 +82,7 @@ def upload_file():
 
         # TODO Lorenz: Cover case where file type is not allowed
         # TODO Lorenz: Enforce max file size limitation
-        if rcvd_file and allowed_file(rcvd_file.filename):
+        if rcvd_file and is_allowed_file(rcvd_file.filename):
             filename = secure_filename(rcvd_file.filename)
             uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                               'tmp', filename)
