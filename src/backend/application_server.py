@@ -22,10 +22,11 @@ Path(RESPONSE_FOLDER).mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
 
 app = Flask(__name__)
-app.secret_key = b'MBWUdbxX;>]vrTL'
+# app.secret_key = b'MBWUdbxX;>]vrTL'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESPONSE_FOLDER'] = RESPONSE_FOLDER
+
 model = Generator(9)
 transform = None
 
