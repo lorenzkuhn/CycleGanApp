@@ -17,6 +17,7 @@ def train():
     path_model_yx = 'cyclegan_gen_BA'
     batchsize = 5
     n_epochs = 250
+    learning_rate = .002
     regularizer = 10
     n_discriminator_steps = 1
     image_size = (256, 256)
@@ -34,10 +35,10 @@ def train():
     gen_xy.apply(utils.init_weights_gaussian)
     gen_yx.apply(utils.init_weights_gaussian)
 
-    optimizer_discr_x = optim.Adam(discr_x.parameters(), lr=0.002)
-    optimizer_discr_y = optim.Adam(discr_y.parameters(), lr=0.002)
-    optimizer_gen_xy = optim.Adam(gen_xy.parameters(), lr=0.002)
-    optimizer_gen_yx = optim.Adam(gen_yx.parameters(), lr=0.002)
+    optimizer_discr_x = optim.Adam(discr_x.parameters(), lr=learning_rate)
+    optimizer_discr_y = optim.Adam(discr_y.parameters(), lr=learning_rate)
+    optimizer_gen_xy = optim.Adam(gen_xy.parameters(), lr=learning_rate)
+    optimizer_gen_yx = optim.Adam(gen_yx.parameters(), lr=learning_rate)
 
     transform = utils.get_transform(image_size)
     train_data_x = torchvision.datasets.ImageFolder(
