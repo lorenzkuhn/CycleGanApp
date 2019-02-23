@@ -20,9 +20,14 @@ import utils
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
 
 app = Flask(__name__)
-app.config.from_object('flask_configuration')
-Path(app.config['UPLOAD_FOLDER'] ).mkdir(exist_ok=True)
+#app.config.from_object('flask_configuration')
+app.config['UPLOAD_FOLDER'] = Path.cwd() / 'uploads/'
+Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
+app.config['RESPONSE_FOLDER'] = Path.cwd() / 'response/'
 Path(app.config['RESPONSE_FOLDER']).mkdir(exist_ok=True)
+
+# Set limit on file size of uploaded files. 50 * 1024 * 1024 is 50 MB.
+MAX_CONTENT_LENGTH = 50 * 1024 * 1024
 
 model = Generator(n_residual_blocks=9, use_dropout=False)
 transform = None
@@ -66,7 +71,7 @@ def upload_file():
         return render_template('index.html')
     else:   # POST request
         if ('file' not in request.files or 
-                (file in request.files and request.files['file'] is None)):
+                ('file' in request.files and request.files['file'] is None)):
             app.logger.info('no file part')
             flash('No file part')
             return redirect(request.url)
@@ -83,10 +88,8 @@ def upload_file():
             filename = secure_filename(rcvd_file.filename)
             uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                               'tmp', filename)
-            app.logger.info("received file {}".format(uploaded_file_path))
             img = Image.open(rcvd_file)
             img = img.convert('RGB')
-            app.logger.info('created image {}'.format(img.tostring()))
             prediction = model(transform(img).unsqueeze(0))
             filename_pred =\
                 'prediction_{}.png'.format(filename.rsplit('.', 1)[0])
@@ -117,5 +120,5 @@ if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
-    load_model('gpu_model')
+    #load_model('gpu_model')
     load_transform_function()
