@@ -33,12 +33,14 @@ class ResidualBlock(nn.Module):
     def __init__(self, n_channels, kernel_size, use_dropout):
         super(ResidualBlock, self).__init__()
         block_1 = [nn.ReflectionPad2d(1),
-                   nn.Conv2d(n_channels, n_channels, kernel_size, padding=0),
+                   nn.Conv2d(n_channels, n_channels, kernel_size, padding=0,
+                             bias=False),
                    nn.InstanceNorm2d(n_channels),
                    nn.ReLU(inplace=True)]
         regularizer = [nn.Dropout(0.5)] if use_dropout else []
         block_2 = [nn.ReflectionPad2d(1),
-                   nn.Conv2d(n_channels, n_channels, kernel_size, padding=0),
+                   nn.Conv2d(n_channels, n_channels, kernel_size, padding=0
+                             bias=False),
                    nn.InstanceNorm2d(n_channels)]
         modules = block_1 + regularizer + block_2
         self.model = nn.Sequential(*modules)
@@ -52,13 +54,13 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         modules_down = [
             nn.ReflectionPad2d(3),
-            nn.Conv2d(3, 64, 7, stride=1, padding=0),
+            nn.Conv2d(3, 64, 7, stride=1, padding=0, bias=False),
             nn.InstanceNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.Conv2d(64, 128, 3, stride=2, padding=1),
+            nn.Conv2d(64, 128, 3, stride=2, padding=1, bias=False),
             nn.InstanceNorm2d(128),
             nn.ReLU(inplace=True),
-            nn.Conv2d(128, 256, 3, stride=2, padding=1),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1, bias=False),
             nn.InstanceNorm2d(256),
             nn.ReLU(inplace=True)
         ]
@@ -68,12 +70,12 @@ class Generator(nn.Module):
                 3,
                 use_dropout) for i in range(n_residual_blocks)]
         modules_up = [
-            nn.ConvTranspose2d(256, 128, 3, stride=2,
-                               padding=1, output_padding=1),
+            nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1,
+                               output_padding=1, bias=False),
             nn.InstanceNorm2d(128),
             nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(128, 64, 3, stride=2,
-                               padding=1, output_padding=1),
+            nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1,
+                               output_padding=1, bias=False),
             nn.InstanceNorm2d(64),
             nn.ReLU(inplace=True),
             nn.ReflectionPad2d(3),
@@ -94,13 +96,13 @@ class Discriminator(nn.Module):
         self.model = nn.Sequential(
             nn.Conv2d(3, 64, 4, stride=2, padding=1),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
-            nn.Conv2d(64, 128, 4, stride=2, padding=1),
+            nn.Conv2d(64, 128, 4, stride=2, padding=1, bias=False),
             nn.InstanceNorm2d(128),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
-            nn.Conv2d(128, 256, 4, stride=2, padding=1),
+            nn.Conv2d(128, 256, 4, stride=2, padding=1, bias=False),
             nn.InstanceNorm2d(256),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
-            nn.Conv2d(256, 512, 4, stride=2, padding=1),
+            nn.Conv2d(256, 512, 4, stride=2, padding=1, bias=False),
             nn.InstanceNorm2d(512),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
             nn.Conv2d(512, 512, 4, stride=1, padding=1),
