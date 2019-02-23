@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 from flask import Flask, flash, request, redirect, render_template,\
                   send_from_directory
 
-from gan import Generator
+from nn_modules import Generator
 from torchvision.utils import save_image
 
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
