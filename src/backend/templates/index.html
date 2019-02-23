@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-45266465-2"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'UA-45266465-2');
-    </script>
     <meta charset="utf-8">
     <title>The Cycle-GAN App</title>
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
@@ -22,22 +14,22 @@
       <h1>The Cycle-GAN App</h1>
     </header>
     <div>
-      <left>
+      <img-container>
         <section>
           <img id='uploaded_image' height='256' width='256'>
         </section>
-        <form id='upload_form' action='' enctype='multipart/form-data' method='post'>
+        <form>
           <div>
             <input id='file_input' type="file" name="file" accept="image/*" required="true">
           </div>
         </form>
-        <p><strong>Status: </strong></p><p id='status_text'>Please select image to transform.</p>
-      </left>
-      <right>
+        <div class='status_title'>Status: </div><div id='status_text'>Please select image to transform.</div>
+      </img-container>
+      <img-container>
         <section>
             <img id='inferred_image' height='256' width='256'>
         </section>
-      </right>
+      </img-container>
     </div>
     <script>
         function handleErrors(response) {
@@ -46,40 +38,50 @@
           }
           return response;
         }
-        // uploads an image file to the server, fetches the inferred image and displays it 
+        // uploads an image file to the server,
+        // fetches the inferred image and displays it
         function upload(file) {
-          let uploaded_image = document.getElementById('uploaded_image');
-          let status_text = document.getElementById('status_text')
-          uploaded_image.src = URL.createObjectURL(file);
+          const status_text = document.getElementById('status_text');
+          document.getElementById('uploaded_image').src = URL.createObjectURL(
+              file);
           const url = '/';
           const data = new FormData();
           data.append('file', file);
           fetch(url, { method: 'POST',body: data})
-          .then(handleErrors)
-          .then(response => {
-            if(!response.ok) { 
-              throw response; 
-            }
-            return response.blob();
-          })
-          .then(blob => {
-            let image = document.getElementById('inferred_image');
-            const objectUrl = URL.createObjectURL(blob);
-            image.src = objectUrl;
-            status_text.innerHTML = 'Here you go. Feel free to upload another image.'
-          })
-          .catch(function(error) {
-            console.log("error occurred");
-            console.log(error);
-            status_text.innerHTML = error;
-          });
+            .then(handleErrors)
+            .then((response) => {
+              if(!response.ok) {
+                throw response;
+              }
+              return response.blob();
+            })
+            .then((blob) => {
+              const objectUrl = URL.createObjectURL(blob);
+              document.getElementById('inferred_image').src = objectUrl;
+              status_text.textContent = 'Here you go. Feel free to upload' +
+                  'another image.'
+            })
+            .catch((error) => {
+              console.log("error occurred");
+              console.log(error);
+              status_text.textContent = error;
+            });
         }
-        // sets up the app logic, declares required variables, contains all the other functions
+        // sets up the app logic, declares required variables,
+        // contains all the other functions
         function initialize() {
           const input = document.getElementById('file_input');
           input.addEventListener('change', () => upload(input.files[0]), false);
         }
-        initialize();    
+        initialize();
+      </script>
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-45266465-2"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-45266465-2');
       </script>
   </body>
 </html>

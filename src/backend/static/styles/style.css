@@ -19,7 +19,7 @@ h1 {
   text-align: center;
 }
 
-input, p {
+input{
   font-size: 1.5rem;
 }
 
@@ -58,4 +58,8 @@ input {
 section img {
   background-color: rgba(126, 126, 126, 0.336);
   width: 100%;
+}
+
+.status_title {
+  font-weight: bold;
 }

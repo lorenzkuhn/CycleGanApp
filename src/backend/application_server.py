@@ -1,20 +1,20 @@
-
 """
 Module defining our flask application server.
 """
 
 import os
 import logging
-from PIL import Image
 from pathlib import Path
+from PIL import Image
+from werkzeug.utils import secure_filename
 import torch
 import torchvision.transforms as transforms
 from flask import Flask, flash, request, redirect, render_template,\
                   send_from_directory
-from werkzeug.utils import secure_filename
-from gan import Generator
-from torchvision.utils import save_image
 
+from nn_modules import Generator
+from torchvision.utils import save_image
+import utils
 UPLOAD_FOLDER = Path.cwd() / 'uploads/'
 Path(UPLOAD_FOLDER).mkdir(exist_ok=True)
 RESPONSE_FOLDER = Path.cwd() / 'response/'
@@ -22,34 +22,34 @@ Path(RESPONSE_FOLDER).mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
 
 app = Flask(__name__)
-app.secret_key = b'MBWUdbxX;>]vrTL'
+# Set limit on file size of uploaded files. 50 * 1024 * 1024 is 50 MB.
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['RESPONSE_FOLDER'] = RESPONSE_FOLDER
+
 model = Generator(9)
 transform = None
 
 
-def init_inference(model_path):
+def load_model(model_path):
     """
     Loads model from file and initialises image transformation.
     :param model_path:
     :return:
     """
     global model
-    global transform
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.load_state_dict(torch.load(model_path, map_location=device))
+
+
+def load_transform_function():
+
+    global transform
     image_size = (256, 256)
-    transform = transforms.Compose([
-        transforms.Resize(image_size),
-        transforms.CenterCrop(image_size),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+    transform = utils.get_transform(image_size)
 
 
-def allowed_file(filename):
+def is_allowed_file(filename):
     """
     Given filename returns whether file is of allowed file type.
     :param filename:
@@ -65,8 +65,9 @@ def upload_file():
     Handles upload of image.
     :return:
     """
-
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('index.html')
+    else:   # POST request
         # check if the post request has the file part
         if 'file' not in request.files:
             app.logger.info('no file part')
@@ -81,7 +82,7 @@ def upload_file():
 
         # TODO Lorenz: Cover case where file type is not allowed
         # TODO Lorenz: Enforce max file size limitation
-        if rcvd_file and allowed_file(rcvd_file.filename):
+        if rcvd_file and is_allowed_file(rcvd_file.filename):
             filename = secure_filename(rcvd_file.filename)
             uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                               'tmp', filename)
@@ -91,7 +92,7 @@ def upload_file():
             app.logger.info('created image {}'.format(img))
             prediction = model(transform(img).unsqueeze(0))
             filename_pred = 'prediction_{}.png'.format(filename.split('.')[0])
-            save_image(prediction, 
+            save_image(prediction,
                        os.path.join(app.config['RESPONSE_FOLDER'],
                                     filename_pred),
                        normalize=True)
@@ -99,7 +100,7 @@ def upload_file():
             '''
             # attempt to create image object from output torch.
             # Tensor, work in progress!
-            data = prediction.data.numpy()            
+            data = prediction.data.numpy()
             new_img = transforms.ToPILImage(mode='RGB')(data)
             np_image = np.squeeze(prediction.data.numpy(), axis=0)
             np_image = np.transpose(np_image, (1, 2, 0))
@@ -123,11 +124,9 @@ def upload_file():
             return send_from_directory(app.config['RESPONSE_FOLDER'],
                                        filename_pred)
 
-    return render_template('index.html')
-
-
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
-    init_inference('gpu_model')
+    load_model('gpu_model')
+    load_transform_function()
