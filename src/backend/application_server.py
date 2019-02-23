@@ -1,17 +1,17 @@
-
 """
 Module defining our flask application server.
 """
 
 import os
 import logging
-from PIL import Image
 from pathlib import Path
+from PIL import Image
+from werkzeug.utils import secure_filename
 import torch
 import torchvision.transforms as transforms
 from flask import Flask, flash, request, redirect, render_template,\
                   send_from_directory
-from werkzeug.utils import secure_filename
+
 from gan import Generator
 from torchvision.utils import save_image
 

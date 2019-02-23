@@ -29,6 +29,6 @@ To update an existing environment if the environment file changes:
 
 In the folder of the flask app:
 ```
-$ export FLASK_APP=hello.py
+$ export FLASK_APP=application_server.py
 $ flask run
 ```
