@@ -116,9 +116,8 @@ def train():
             gen_yx, device)
         loss = loss_function(cycle_data)
 
-        loss.backward(retain_graph=True)
-        optimizer_gen_xy.step()
         loss.backward()
+        optimizer_gen_xy.step()
         optimizer_gen_yx.step()
 
     torch.save(gen_xy.state_dict(), path_model_xy)
