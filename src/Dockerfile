@@ -25,6 +25,7 @@ ENV FLASK_APP application_server.py
 RUN chown -R cyclegan:cyclegan ./
 RUN chown -R cyclegan:cyclegan /var/log/nginx
 RUN chown -R cyclegan:cyclegan /var/lib/nginx
+RUN chown -R cyclegan:cyclegan /run
 USER cyclegan
 
 
