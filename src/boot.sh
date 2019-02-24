@@ -1,5 +1,4 @@
 #!/bin/bash
-exec nginx -c /home/cyclegan/nginx.conf 
 # Use the following to pipe log to stdout in debug mode
 exec gunicorn --workers=3 --timeout 120 -b 0.0.0.0:8080 --access-logfile - --error-logfile - --log-level=debug application_server:app
 
