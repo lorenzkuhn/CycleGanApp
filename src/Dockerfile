@@ -27,4 +27,4 @@ USER cyclegan
 
 EXPOSE 80
 
-ENTRYPOINT [ "/bin/bash", "-c", "source activate onenv && nginx -c /home/cyclegan/nginx.conf &; ./boot.sh" ] 
+ENTRYPOINT [ "/bin/bash", "-c", "source activate onenv && nginx -c /home/cyclegan/nginx.conf & ./boot.sh" ] 
