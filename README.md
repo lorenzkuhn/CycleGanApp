@@ -32,3 +32,5 @@ In the folder of the flask app:
 $ export FLASK_APP=application_server.py
 $ flask run
 ```
+## Training the CycleGAN model on Leonhard
+`bsub -R "rusage[mem=64000]" -q "gpu.24h" "python cyclegan.py"`

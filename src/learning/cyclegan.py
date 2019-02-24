@@ -1,3 +1,4 @@
+import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,17 +8,26 @@ import utils
 
 
 def train():
+
+    parser = argparse.ArgumentParser(description='Train model.')
+    parser.add_argument('--batchsize', type=int)
+    parser.add_argument('--n_epochs', default=2, type=int)
+    args = parser.parse_args()
+
+    # batchsize = 1
+    batchsize = args.batchsize
+    # n_epochs = 250
+    n_epochs = args.n_epochs
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(7)
     n_residual_blocks = 9
     use_dropout = False
-    path_train_data_x = 'train_A'
-    path_train_data_y = 'train_B'
+    path_train_data_x = 'trainA'
+    path_train_data_y = 'trainB'
     path_model_xy = 'cyclegan_gen_AB'
     path_model_yx = 'cyclegan_gen_BA'
-    batchsize = 1
-    n_epochs = 250
-    learning_rate = .002
+    # learning_rate = .002
     regularizer = 10
     n_discriminator_steps = 1
     image_size = (256, 256)
@@ -35,10 +45,15 @@ def train():
     gen_xy.apply(utils.init_weights_gaussian)
     gen_yx.apply(utils.init_weights_gaussian)
 
-    optimizer_discr_x = optim.Adam(discr_x.parameters(), lr=learning_rate)
-    optimizer_discr_y = optim.Adam(discr_y.parameters(), lr=learning_rate)
-    optimizer_gen_xy = optim.Adam(gen_xy.parameters(), lr=learning_rate)
-    optimizer_gen_yx = optim.Adam(gen_yx.parameters(), lr=learning_rate)
+    optimizer_discr_x = optim.Adam(discr_x.parameters())
+    optimizer_discr_y = optim.Adam(discr_y.parameters())
+    optimizer_gen_xy = optim.Adam(gen_xy.parameters())
+    optimizer_gen_yx = optim.Adam(gen_yx.parameters())
+
+    scheduler_discr_x = utils.HingeScheduler(optimizer_discr_x, .0001, 100, 100)
+    scheduler_discr_y = utils.HingeScheduler(optimizer_discr_y, .0001, 100, 100)
+    scheduler_gen_xy = utils.HingeScheduler(optimizer_gen_xy, .0002, 100, 100)
+    scheduler_gen_yx = utils.HingeScheduler(optimizer_gen_yx, .0002, 100, 100)
 
     transform = utils.get_transform(image_size)
     train_data_x = torchvision.datasets.ImageFolder(
@@ -57,6 +72,8 @@ def train():
         for _ in range(n_discriminator_steps):
             optimizer_discr_x.zero_grad()
             optimizer_discr_y.zero_grad()
+            scheduler_discr_x.step()
+            scheduler_discr_y.step()
 
             cycle_data = utils.get_batch_data(
                 train_data_x_loader, train_data_y_loader, discr_x, discr_y,
@@ -79,6 +96,8 @@ def train():
 
         optimizer_gen_xy.zero_grad()
         optimizer_gen_yx.zero_grad()
+        scheduler_gen_xy.step()
+        scheduler_gen_yx.step()
         cycle_data = utils.get_batch_data(
             train_data_x_loader, train_data_y_loader, discr_x, discr_y, gen_xy,
             gen_yx, device)
