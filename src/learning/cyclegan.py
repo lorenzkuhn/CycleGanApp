@@ -10,12 +10,12 @@ import utils
 def train():
 
     parser = argparse.ArgumentParser(description='Train model.')
-    parser.add_argument('--batchsize', type=int)
+    parser.add_argument('--batch_size', type=int)
     parser.add_argument('--n_epochs', default=2, type=int)
     args = parser.parse_args()
 
-    # batchsize = 1
-    batchsize = args.batchsize
+    # batch_size = 1
+    batch_size = args.batch_size
     # n_epochs = 250
     n_epochs = args.n_epochs
 
@@ -59,11 +59,11 @@ def train():
     train_data_x = torchvision.datasets.ImageFolder(
         root=path_train_data_x, transform=transform)
     train_data_x_loader = torch.utils.data.DataLoader(
-        train_data_x, batch_size=batchsize, shuffle=True, num_workers=4)
+        train_data_x, batch_size=batch_size, shuffle=True, num_workers=4)
     train_data_y = torchvision.datasets.ImageFolder(
         root=path_train_data_y, transform=transform)
     train_data_y_loader = torch.utils.data.DataLoader(
-        train_data_y, batch_size=batchsize, shuffle=True, num_workers=4)
+        train_data_y, batch_size=batch_size, shuffle=True, num_workers=4)
 
     synthesis_x_pool = utils.HistoricPool(50)
     synthesis_y_pool = utils.HistoricPool(50)
@@ -78,7 +78,7 @@ def train():
             scheduler_discr_x.step()
             scheduler_discr_y.step()
 
-            cycle_data = utils.get_batch_data(
+            cycle_data = utils.get_cycle_data(
                 train_data_x_loader, train_data_y_loader, discr_x, discr_y,
                 gen_xy, gen_yx, device)
 
@@ -88,13 +88,13 @@ def train():
             synthesis_y_batch = synthesis_y_pool.get_batch()
 
             # Maximizing loss function - hence inverting labels.
-            size = cycle_data.batch_x_predictions.size()
-            batch_targets = utils.get_target(True, True, size, device)
+            size = cycle_data.real_x_predictions.size()
+            real_targets = utils.get_target(True, True, size, device)
             synthesis_targets = utils.get_target(False, True, size, device)
 
-            loss_x = mse(cycle_data.batch_x_predictions, batch_targets) +\
+            loss_x = mse(cycle_data.real_x_predictions, real_targets) +\
                 mse(discr_x(synthesis_x_batch), synthesis_targets)
-            loss_y = mse(cycle_data.batch_y_predictions, batch_targets) +\
+            loss_y = mse(cycle_data.real_y_predictions, real_targets) +\
                 mse(discr_y(synthesis_y_batch), synthesis_targets)
 
             loss_x.backward()
@@ -106,7 +106,7 @@ def train():
         optimizer_gen_yx.zero_grad()
         scheduler_gen_xy.step()
         scheduler_gen_yx.step()
-        cycle_data = utils.get_batch_data(
+        cycle_data = utils.get_cycle_data(
             train_data_x_loader, train_data_y_loader, discr_x, discr_y, gen_xy,
             gen_yx, device)
         loss = loss_function(cycle_data)

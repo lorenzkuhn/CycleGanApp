@@ -48,13 +48,13 @@ class HingeScheduler(torch.optim.lr_scheduler._LRScheduler):
 
 
 class CycleData():
-    def __init__(self, discr_x, discr_y, gen_xy, gen_yx, batch_x, batch_y):
-        self.batch_x = batch_x
-        self.batch_y = batch_y
-        self.synthesis_x = gen_yx(batch_y)
-        self.synthesis_y = gen_xy(batch_x)
-        self.batch_x_predictions = discr_x(self.batch_x)
-        self.batch_y_predictions = discr_y(self.batch_y)
+    def __init__(self, discr_x, discr_y, gen_xy, gen_yx, real_x, real_y):
+        self.real_x = real_x
+        self.real_y = real_y
+        self.synthesis_x = gen_yx(real_y)
+        self.synthesis_y = gen_xy(real_x)
+        self.real_x_predictions = discr_x(self.real_x)
+        self.real_y_predictions = discr_y(self.real_y)
         self.synthesis_x_predictions = discr_x(self.synthesis_x)
         self.synthesis_y_predictions = discr_y(self.synthesis_y)
         self.id_x_approximations = gen_yx(self.synthesis_y)
@@ -69,13 +69,13 @@ def get_transform(image_size):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
 
-def get_batch_data(data_x_loader, data_y_loader, discr_x, discr_y, gen_xy,
+def get_cycle_data(data_x_loader, data_y_loader, discr_x, discr_y, gen_xy,
                    gen_yx, device):
-    batch_x, _ = next(iter(data_x_loader))
-    batch_x = batch_x.to(device)
-    batch_y, _ = next(iter(data_y_loader))
-    batch_y = batch_y.to(device)
-    cycle_data = CycleData(discr_x, discr_y, gen_xy, gen_yx, batch_x, batch_y)
+    real_x, _ = next(iter(data_x_loader))
+    real_x = real_x.to(device)
+    real_y, _ = next(iter(data_y_loader))
+    real_y = real_y.to(device)
+    cycle_data = CycleData(discr_x, discr_y, gen_xy, gen_yx, real_x, real_y)
     return cycle_data
 
 
