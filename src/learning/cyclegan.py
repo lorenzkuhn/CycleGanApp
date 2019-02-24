@@ -1,3 +1,4 @@
+import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,6 +8,17 @@ import utils
 
 
 def train():
+
+    parser = argparse.ArgumentParser(description='Train model.')
+    parser.add_argument('--batchsize', type=int)
+    parser.add_argument('--n_epochs', default=2, type=int)
+    args = parser.parse_args()
+
+    # batchsize = 1
+    batchsize = args.batch_size
+    # n_epochs = 250
+    n_epochs = args.n_epochs
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(7)
     n_residual_blocks = 9
@@ -15,8 +27,6 @@ def train():
     path_train_data_y = 'train_B'
     path_model_xy = 'cyclegan_gen_AB'
     path_model_yx = 'cyclegan_gen_BA'
-    batchsize = 1
-    n_epochs = 250
     learning_rate = .002
     regularizer = 10
     n_discriminator_steps = 1
