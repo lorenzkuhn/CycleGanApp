@@ -5,12 +5,12 @@ import torch.optim as optim
 import torchvision
 from nn_modules import CycleGANLoss, Discriminator, Generator
 import utils
-
+import gc
 
 def train():
 
     parser = argparse.ArgumentParser(description='Train model.')
-    parser.add_argument('--batchsize', type=int)
+    parser.add_argument('--batchsize', default=1, type=int)
     parser.add_argument('--n_epochs', default=2, type=int)
     args = parser.parse_args()
 
@@ -81,11 +81,17 @@ def train():
                 mse(cycle_data.synthesis_x_predictions, synthesis_targets)
             loss_y = mse(cycle_data.batch_y_predictions, batch_targets) +\
                 mse(cycle_data.synthesis_y_predictions, synthesis_targets)
-
+            print("Epoch {}, x Discriminator loss: {}".format(epoch_index, loss_x))
+            print("Epoch {}, y Discriminator loss: {}".format(epoch_index, loss_y))
+            total_loss = loss_function(cycle_data)
+            print("Epoch {}, Total loss before discriminator update: {}".format(epoch_index, total_loss))          
             loss_x.backward()
             optimizer_discr_x.step()
             loss_y.backward()
             optimizer_discr_y.step()
+            cycle_data_updated = utils.CycleData(discr_x, discr_y, gen_xy, gen_yx, cycle_data.batch_x, cycle_data.batch_y)
+            total_loss = loss_function(cycle_data_updated)
+            print("Epoch {}, Total loss after discriminator update: {}".format(epoch_index, total_loss))
 
         optimizer_gen_xy.zero_grad()
         optimizer_gen_yx.zero_grad()
@@ -93,11 +99,14 @@ def train():
             train_data_x_loader, train_data_y_loader, discr_x, discr_y, gen_xy,
             gen_yx, device)
         loss = loss_function(cycle_data)
-
+        print("Epoch {}, Generator loss before update: {}".format(epoch_index, loss))
         loss.backward(retain_graph=True)
         optimizer_gen_xy.step()
         loss.backward()
         optimizer_gen_yx.step()
+        cycle_data_updated = utils.CycleData(discr_x, discr_y, gen_xy, gen_yx, cycle_data.batch_x, cycle_data.batch_y)      
+        loss = loss_function(cycle_data_updated)
+        print("Epoch {}, Generator loss after update: {}".format(epoch_index, loss))
 
     torch.save(gen_xy.state_dict(), path_model_xy)
     torch.save(gen_yx.state_dict(), path_model_yx)
