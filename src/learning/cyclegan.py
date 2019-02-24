@@ -16,7 +16,7 @@ def train():
     path_model_xy = 'cyclegan_gen_AB'
     path_model_yx = 'cyclegan_gen_BA'
     batchsize = 1
-    n_epochs = 250
+    n_epochs = 1
     learning_rate = .002
     regularizer = 10
     n_discriminator_steps = 1
