@@ -26,16 +26,16 @@ input{
 /* block styling */
 
 header, left, right, footer {
-  border: 2px solid rgb(100, 98, 98);
-  padding: 20px;
+  padding: 1.75em;
 }
 
 body > div {
-  border: 2px solid rgb(100, 98, 98);
   display: flex;
 }
 
 img-container {
+  border: 2px solid rgb(100, 98, 98);
+  padding: 1em;
   align-items: stretch;
   display: flex;
   flex: 5;
@@ -43,15 +43,13 @@ img-container {
 }
 
 img-container div {
-  margin-bottom: 20px;
+  margin-bottom: 1.75em;
 }
 
 input {
-  background: rgb(71, 70, 70);
-  box-shadow: inset 1px 1px 1px white;
   color: rgb(0, 0, 0);
   display: block;
-  padding: 5px;
+  padding: 1em;
   width: 201.5px;
 }
 

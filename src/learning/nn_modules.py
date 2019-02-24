@@ -13,20 +13,20 @@ class CycleGANLoss(nn.Module):
         mse = nn.MSELoss(reduction='mean').to(self.device)
         l1norm = nn.L1Loss(reduction='mean').to(self.device)
 
-        batch_targets = utils.get_target(
-            True, self.inverted, data.batch_x_predictions.size(), self.device)
+        real_targets = utils.get_target(
+            True, self.inverted, data.real_x_predictions.size(), self.device)
         synthesis_targets = utils.get_target(
             False, self.inverted, data.synthesis_x_predictions.size(),
             self.device)
 
-        return mse(data.batch_x_predictions, batch_targets) +\
+        return mse(data.real_x_predictions, real_targets) +\
             mse(data.synthesis_x_predictions, synthesis_targets) +\
-            mse(data.batch_y_predictions, batch_targets) +\
+            mse(data.real_y_predictions, real_targets) +\
             mse(data.synthesis_y_predictions, synthesis_targets) +\
             self.regularizer * l1norm(data.id_x_approximations,
-                                      data.batch_x) +\
+                                      data.real_x) +\
             self.regularizer * l1norm(data.id_y_approximations,
-                                      data.batch_y)
+                                      data.real_y)
 
 
 class ResidualBlock(nn.Module):
@@ -108,7 +108,8 @@ class Discriminator(nn.Module):
             nn.Conv2d(512, 512, 4, stride=1, padding=1),
             nn.InstanceNorm2d(512),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
-            nn.Conv2d(512, 1, 4, stride=1, padding=1)
+            nn.Conv2d(512, 1, 4, stride=1, padding=1),
+            nn.Sigmoid()
         )
 
     def forward(self, x):
