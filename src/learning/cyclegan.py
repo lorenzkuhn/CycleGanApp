@@ -73,6 +73,8 @@ def train():
 
     for epoch_index in range(n_epochs):
         for _ in range(n_discriminator_steps):
+            utils.switch_cycle_gradient_requirements(
+                discr_x, discr_y, gen_xy, gen_yx, True)
             optimizer_discr_x.zero_grad()
             optimizer_discr_y.zero_grad()
             scheduler_discr_x.step()
@@ -94,13 +96,16 @@ def train():
 
             loss_x = mse(cycle_data.real_x_predictions, real_targets) +\
                 mse(discr_x(synthesis_x_batch), synthesis_targets)
-            loss_y = mse(cycle_data.real_y_predictions, real_targets) +\
-                mse(discr_y(synthesis_y_batch), synthesis_targets)
-
             loss_x.backward()
             optimizer_discr_x.step()
+
+            loss_y = mse(cycle_data.real_y_predictions, real_targets) +\
+                mse(discr_y(synthesis_y_batch), synthesis_targets)
             loss_y.backward()
             optimizer_discr_y.step()
+
+        utils.switch_cycle_gradient_requirements(
+            discr_x, discr_y, gen_xy, gen_yx, False)
 
         optimizer_gen_xy.zero_grad()
         optimizer_gen_yx.zero_grad()
