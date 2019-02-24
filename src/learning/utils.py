@@ -1,5 +1,34 @@
+import random
 import torch
 import torchvision.transforms as transforms
+
+
+class HistoricPool():
+    def __init__(self, pool_size):
+        self.pool_size = pool_size
+        self.pool = []
+        self.next_batch = []
+
+    def update(self, new_images):
+        # If len(pool) + len(images) < pool_size, the next batch will consist
+        # of purely new images. Whether this is desirable is very debatable.
+        self.next_batch = []
+        for new_image_index in range(new_images.size()[0]):
+            new_image = new_images[new_image_index].unsqueeze(0)
+            if len(self.pool) < self.pool_size:
+                self.pool.append(new_image)
+                self.next_batch.append(new_image)
+            else:
+                if random.uniform(0, 1) > .5:
+                    self.next_batch.append(new_image)
+                else:
+                    pool_sample_index = random.randint(
+                        0, self.pool_size - 1)
+                    self.next_batch.append(self.pool[pool_sample_index])
+                    self.pool[pool_sample_index] = new_image
+
+    def get_batch(self):
+        return torch.cat(self.next_batch, dim=0)
 
 
 class HingeScheduler(torch.optim.lr_scheduler._LRScheduler):

@@ -65,6 +65,9 @@ def train():
     train_data_y_loader = torch.utils.data.DataLoader(
         train_data_y, batch_size=batchsize, shuffle=True, num_workers=4)
 
+    synthesis_x_pool = utils.HistoricPool(50)
+    synthesis_y_pool = utils.HistoricPool(50)
+
     mse = nn.MSELoss(reduction='mean').to(device)
     loss_function = CycleGANLoss(regularizer, False, device)
 
@@ -79,15 +82,20 @@ def train():
                 train_data_x_loader, train_data_y_loader, discr_x, discr_y,
                 gen_xy, gen_yx, device)
 
+            synthesis_x_pool.update(cycle_data.synthesis_x)
+            synthesis_y_pool.update(cycle_data.synthesis_y)
+            synthesis_x_batch = synthesis_x_pool.get_batch()
+            synthesis_y_batch = synthesis_y_pool.get_batch()
+
             # Maximizing loss function - hence inverting labels.
             size = cycle_data.batch_x_predictions.size()
             batch_targets = utils.get_target(True, True, size, device)
             synthesis_targets = utils.get_target(False, True, size, device)
 
             loss_x = mse(cycle_data.batch_x_predictions, batch_targets) +\
-                mse(cycle_data.synthesis_x_predictions, synthesis_targets)
+                mse(discr_x(synthesis_x_batch), synthesis_targets)
             loss_y = mse(cycle_data.batch_y_predictions, batch_targets) +\
-                mse(cycle_data.synthesis_y_predictions, synthesis_targets)
+                mse(discr_y(synthesis_y_batch), synthesis_targets)
 
             loss_x.backward()
             optimizer_discr_x.step()
