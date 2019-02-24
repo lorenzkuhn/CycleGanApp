@@ -13,8 +13,7 @@ COPY learning/gpu_model gpu_model
 COPY learning/nn_modules.py nn_modules.py
 COPY learning/utils.py utils.py
 COPY nginx.conf nginx.conf
-RUN conda update -y conda
-RUN conda update -y --all
+RUN apt-get update && apt-get install -y nginx
 RUN conda env create -f environment.yml
 
 COPY backend/application_server.py boot.sh ./
@@ -27,4 +26,4 @@ USER cyclegan
 
 EXPOSE 80
 
-ENTRYPOINT [ "/bin/bash", "-c", "source activate onenv && nginx -c /home/cyclegan/nginx.conf & source activate onenv && ls && ./boot.sh" ] 
+ENTRYPOINT [ "/bin/bash", "-c", "nginx -c /home/cyclegan/nginx.conf & source activate onenv && ./boot.sh" ] 
