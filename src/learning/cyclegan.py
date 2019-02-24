@@ -15,7 +15,7 @@ def train():
     args = parser.parse_args()
 
     # batchsize = 1
-    batchsize = args.batch_size
+    batchsize = args.batchsize
     # n_epochs = 250
     n_epochs = args.n_epochs
 
