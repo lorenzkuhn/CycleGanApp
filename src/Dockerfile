@@ -26,4 +26,5 @@ RUN chown -R cyclegan:cyclegan ./
 USER cyclegan
 
 EXPOSE 80
-ENTRYPOINT [ "/bin/bash", "-c", "source activate onenv && ./boot.sh" ] 
+
+ENTRYPOINT [ "/bin/bash", "-c", "source activate onenv && nginx -c /home/cyclegan/nginx.conf & source activate onenv && ls && ./boot.sh" ] 
