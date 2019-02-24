@@ -5,7 +5,7 @@ from nn_modules import Generator
 from utils import get_transform
 
 MODEL_PATH = 'gpu_model'
-VALIDATION_DATA_PATH = 'test_A'
+VALIDATION_DATA_PATH = 'testA'
 
 DISPLAY_IMAGE = False
 N_VALIDATION_IMAGES = 3
