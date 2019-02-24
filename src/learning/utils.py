@@ -2,6 +2,22 @@ import torch
 import torchvision.transforms as transforms
 
 
+class HingeScheduler(torch.optim.lr_scheduler._LRScheduler):
+    def __init__(self, optimizer, max_lr, n_max_epochs, n_decayed_epochs,
+                 last_epoch=-1):
+        self.max_lrs = [max_lr for group in optimizer.param_groups]
+        self.n_max_epochs = n_max_epochs
+        self.n_decayed_epochs = n_decayed_epochs
+        super().__init__(optimizer, last_epoch)
+
+    def get_lr(self):
+        if self.last_epoch < self.n_max_epochs:
+            return self.max_lrs
+        return [lr * (self.last_epoch - self.n_max_epochs)
+                / self.n_decayed_epochs
+                for lr in self.max_lrs]
+
+
 class CycleData():
     def __init__(self, discr_x, discr_y, gen_xy, gen_yx, batch_x, batch_y):
         self.batch_x = batch_x
