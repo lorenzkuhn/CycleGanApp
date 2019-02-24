@@ -23,8 +23,8 @@ def train():
     torch.manual_seed(7)
     n_residual_blocks = 9
     use_dropout = False
-    path_train_data_x = 'train_A'
-    path_train_data_y = 'train_B'
+    path_train_data_x = 'trainA'
+    path_train_data_y = 'trainB'
     path_model_xy = 'cyclegan_gen_AB'
     path_model_yx = 'cyclegan_gen_BA'
     learning_rate = .002
