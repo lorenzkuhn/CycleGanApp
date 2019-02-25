@@ -14,9 +14,7 @@ def train():
     parser.add_argument('--n_epochs', default=2, type=int)
     args = parser.parse_args()
 
-    # batch_size = 1
     batch_size = args.batch_size
-    # n_epochs = 250
     n_epochs = args.n_epochs
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -25,8 +23,8 @@ def train():
     use_dropout = False
     path_train_data_x = 'trainA'
     path_train_data_y = 'trainB'
-    path_model_xy = 'cyclegan_gen_AB'
-    path_model_yx = 'cyclegan_gen_BA'
+    path_model_xy = f'cyclegan_gen_AB_{n_epochs}_{batch_size}'
+    path_model_yx = f'cyclegan_gen_BA_{n_epochs}_{batch_size}'
     # learning_rate = .002
     regularizer = 10
     n_discriminator_steps = 1
@@ -50,10 +48,14 @@ def train():
     optimizer_gen_xy = optim.Adam(gen_xy.parameters())
     optimizer_gen_yx = optim.Adam(gen_yx.parameters())
 
-    scheduler_discr_x = utils.HingeScheduler(optimizer_discr_x, .0001, 100, 100)
-    scheduler_discr_y = utils.HingeScheduler(optimizer_discr_y, .0001, 100, 100)
-    scheduler_gen_xy = utils.HingeScheduler(optimizer_gen_xy, .0002, 100, 100)
-    scheduler_gen_yx = utils.HingeScheduler(optimizer_gen_yx, .0002, 100, 100)
+    scheduler_discr_x = utils.HingeScheduler(optimizer_discr_x, .0001,
+                                             n_epochs / 2, n_epochs / 2)
+    scheduler_discr_y = utils.HingeScheduler(optimizer_discr_y, .0001,
+                                             n_epochs / 2, n_epochs / 2)
+    scheduler_gen_xy = utils.HingeScheduler(optimizer_gen_xy, .0002,
+                                            n_epochs / 2, n_epochs / 2)
+    scheduler_gen_yx = utils.HingeScheduler(optimizer_gen_yx, .0002,
+                                            n_epochs / 2, n_epochs / 2)
 
     transform = utils.get_transform(image_size)
     train_data_x = torchvision.datasets.ImageFolder(
@@ -73,6 +75,8 @@ def train():
 
     for epoch_index in range(n_epochs):
         for _ in range(n_discriminator_steps):
+            utils.switch_cycle_gradient_requirements(
+                discr_x, discr_y, gen_xy, gen_yx, True)
             optimizer_discr_x.zero_grad()
             optimizer_discr_y.zero_grad()
             scheduler_discr_x.step()
@@ -94,13 +98,16 @@ def train():
 
             loss_x = mse(cycle_data.real_x_predictions, real_targets) +\
                 mse(discr_x(synthesis_x_batch), synthesis_targets)
-            loss_y = mse(cycle_data.real_y_predictions, real_targets) +\
-                mse(discr_y(synthesis_y_batch), synthesis_targets)
-
             loss_x.backward()
             optimizer_discr_x.step()
+
+            loss_y = mse(cycle_data.real_y_predictions, real_targets) +\
+                mse(discr_y(synthesis_y_batch), synthesis_targets)
             loss_y.backward()
             optimizer_discr_y.step()
+
+        utils.switch_cycle_gradient_requirements(
+            discr_x, discr_y, gen_xy, gen_yx, False)
 
         optimizer_gen_xy.zero_grad()
         optimizer_gen_yx.zero_grad()
@@ -111,10 +118,10 @@ def train():
             gen_yx, device)
         loss = loss_function(cycle_data)
 
-        loss.backward(retain_graph=True)
-        optimizer_gen_xy.step()
         loss.backward()
+        optimizer_gen_xy.step()
         optimizer_gen_yx.step()
+        print(epoch_index)
 
     torch.save(gen_xy.state_dict(), path_model_xy)
     torch.save(gen_yx.state_dict(), path_model_yx)

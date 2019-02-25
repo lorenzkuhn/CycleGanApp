@@ -85,6 +85,19 @@ def init_weights_gaussian(model):
         model.weight.data.normal_(0.0, 0.02)
 
 
+def switch_gradient_requirement(model, requires_gradient):
+    for parameter in model.parameters():
+        parameter.requires_grad = requires_gradient
+
+
+def switch_cycle_gradient_requirements(discr_x, discr_y, gen_xy, gen_yx,
+                                       require_discr):
+    switch_gradient_requirement(discr_x, require_discr)
+    switch_gradient_requirement(discr_y, require_discr)
+    switch_gradient_requirement(gen_yx, not require_discr)
+    switch_gradient_requirement(gen_xy, not require_discr)
+
+
 def get_target(real, inverted, shape, device):
     if (real and not inverted) or (not real and inverted):
         return torch.zeros(shape).to(device)

@@ -12,10 +12,10 @@ COPY environment.yml environment.yml
 COPY learning/gpu_model gpu_model
 COPY learning/nn_modules.py nn_modules.py
 COPY learning/utils.py utils.py
-COPY nginx.conf nginx.conf
-RUN conda update -y conda
-RUN conda update -y --all
+RUN apt-get update && apt-get install -y nginx
+RUN conda update -n base -c defaults conda
 RUN conda env create -f environment.yml
+COPY nginx.conf nginx.conf
 
 COPY backend/application_server.py boot.sh ./
 RUN chmod +x boot.sh
@@ -23,8 +23,12 @@ RUN chmod +x boot.sh
 ENV FLASK_APP application_server.py
 
 RUN chown -R cyclegan:cyclegan ./
+RUN chown -R cyclegan:cyclegan /var/log/nginx
+RUN chown -R cyclegan:cyclegan /var/lib/nginx
+RUN chown -R cyclegan:cyclegan /run
 USER cyclegan
+
 
 EXPOSE 80
 
-ENTRYPOINT [ "/bin/bash", "-c", "source activate onenv && nginx -c /home/cyclegan/nginx.conf & source activate onenv && ls && ./boot.sh" ] 
+ENTRYPOINT [ "/bin/bash", "-c", "nginx -c /home/cyclegan/nginx.conf & source activate onenv && ./boot.sh" ] 
