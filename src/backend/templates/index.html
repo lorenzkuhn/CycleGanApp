@@ -58,7 +58,7 @@
             .then((blob) => {
               const objectUrl = URL.createObjectURL(blob);
               document.getElementById('inferred_image').src = objectUrl;
-              status_text.textContent = 'Here you go. Feel free to upload' +
+              status_text.textContent = 'Here you go. Feel free to upload ' +
                   'another image.'
             })
             .catch((error) => {
