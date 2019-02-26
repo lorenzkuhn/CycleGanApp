@@ -73,47 +73,52 @@ def upload_file():
         if ('file' not in request.files or
                 ('file' in request.files and request.files['file'] is None)):
             abort(404)
-            
+            return
+
         rcvd_file = request.files['file']
         # if user does not select file, browser also
         # submit an empty part without filename
         if rcvd_file.filename == '':
             abort(404)
+            return
 
-        if rcvd_file and is_allowed_file(rcvd_file.filename):
-            filename = secure_filename(rcvd_file.filename)
-            uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
+        if !rcvd_file or !is_allowed_file(rcvd_file.filename):
+            abort(404)
+            return
+
+        filename = secure_filename(rcvd_file.filename)
+        uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                               'tmp', filename)
-            try:
-                img = Image.open(rcvd_file)
-                img = img.convert('RGB')
-                prediction = model(transform(img).unsqueeze(0))
-                filename_pred = 'prediction_{}.png'.format(
-                    filename.rsplit('.', 1)[0])
-                save_image(prediction,
-                           os.path.join(app.config['RESPONSE_FOLDER'],
-                                        filename_pred),
-                           normalize=True)
+        try:
+            img = Image.open(rcvd_file)
+            img = img.convert('RGB')
+            prediction = model(transform(img).unsqueeze(0))
+            filename_pred = 'prediction_{}.png'.format(
+                filename.rsplit('.', 1)[0])
+            save_image(prediction,
+                       os.path.join(app.config['RESPONSE_FOLDER'],
+                                    filename_pred),
+                       normalize=True)
 
-            except:
-                abort(404)
+        except:
+            abort(404)
+            return
+        '''
+        # attempt to create image object from output torch.
+        # Tensor, work in progress!
+        data = prediction.data.numpy()
+        new_img = transforms.ToPILImage(mode='RGB')(data)
+        np_image = np.squeeze(prediction.data.numpy(), axis=0)
+        np_image = np.transpose(np_image, (1, 2, 0))
+        new_img = Image.fromarray(np_image, 'RGB')
+        img_byte_arr = io.BytesIO()
+        new_img.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+        return send_file(io.BytesIO(img_byte_arr),
+                 attachment_filename='prediction.png',
+                 mimetype='image/png')'''
 
-            '''
-            # attempt to create image object from output torch.
-            # Tensor, work in progress!
-            data = prediction.data.numpy()
-            new_img = transforms.ToPILImage(mode='RGB')(data)
-            np_image = np.squeeze(prediction.data.numpy(), axis=0)
-            np_image = np.transpose(np_image, (1, 2, 0))
-            new_img = Image.fromarray(np_image, 'RGB')
-            img_byte_arr = io.BytesIO()
-            new_img.save(img_byte_arr, format='PNG')
-            img_byte_arr = img_byte_arr.getvalue()
-            return send_file(io.BytesIO(img_byte_arr),
-                     attachment_filename='prediction.png',
-                     mimetype='image/png')'''
-
-            return send_from_directory(app.config['RESPONSE_FOLDER'],
+        return send_from_directory(app.config['RESPONSE_FOLDER'],
                                        filename_pred)
 
 if __name__ != '__main__':
