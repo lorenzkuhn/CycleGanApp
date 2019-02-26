@@ -72,15 +72,13 @@ def upload_file():
     else:   # POST request
         if ('file' not in request.files or
                 ('file' in request.files and request.files['file'] is None)):
-            app.logger.info('no file part')
-            flash('No file part')
-            return redirect(request.url)
+            abort(404)
+            
         rcvd_file = request.files['file']
         # if user does not select file, browser also
         # submit an empty part without filename
         if rcvd_file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
+            abort(404)
 
         if rcvd_file and is_allowed_file(rcvd_file.filename):
             filename = secure_filename(rcvd_file.filename)
@@ -99,8 +97,6 @@ def upload_file():
 
             except:
                 abort(404)
-                abort(Response('Improper image type.'))
-
 
             '''
             # attempt to create image object from output torch.
