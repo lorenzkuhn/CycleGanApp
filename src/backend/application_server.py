@@ -27,7 +27,7 @@ app.config['RESPONSE_FOLDER'] = Path.cwd() / 'response/'
 Path(app.config['RESPONSE_FOLDER']).mkdir(exist_ok=True)
 
 # Set limit on file size of uploaded files. 50 * 1024 * 1024 is 50 MB.
-MAX_CONTENT_LENGTH = 50 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 model = Generator(n_residual_blocks=9, use_dropout=False)
 transform = None
@@ -82,8 +82,6 @@ def upload_file():
             flash('No selected file')
             return redirect(request.url)
 
-        # TODO Lorenz: Cover case where file type is not allowed
-        # TODO Lorenz: Enforce max file size limitation
         if rcvd_file and is_allowed_file(rcvd_file.filename):
             filename = secure_filename(rcvd_file.filename)
             uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
