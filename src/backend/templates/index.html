@@ -69,9 +69,23 @@
         }
         // sets up the app logic, declares required variables,
         // contains all the other functions
-        function initialize() {
+        initialize = () => {
           const input = document.getElementById('file_input');
-          input.addEventListener('change', () => upload(input.files[0]), false);
+          const statusText = document.getElementById('status_text');
+          input.addEventListener('change', () => {
+            if (!input.files || !input.files[0]) {
+              statusText.textContent = 'No appropriate file chosen.'
+              return;
+            }
+            const file = input.files[0];
+            if (file.size > 50 * 1024 * 1024) {
+              statusText.textContent = 'File size too big.'
+            } else if (!file.type.startsWith("image/")) {
+              statusText.textContent = 'File not an image.'
+            } else {
+              upload(file);
+            }
+          }, false);
         }
         initialize();
       </script>
