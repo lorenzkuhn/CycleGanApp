@@ -82,7 +82,7 @@ def upload_file():
             abort(404)
             return
 
-        if !rcvd_file or !is_allowed_file(rcvd_file.filename):
+        if not rcvd_file or not is_allowed_file(rcvd_file.filename):
             abort(404)
             return
 
