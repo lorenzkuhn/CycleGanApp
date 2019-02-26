@@ -70,7 +70,7 @@ def upload_file():
     if request.method == 'GET':
         return render_template('index.html')
     else:   # POST request
-        if ('file' not in request.files or 
+        if ('file' not in request.files or
                 ('file' in request.files and request.files['file'] is None)):
             app.logger.info('no file part')
             flash('No file part')
@@ -90,9 +90,12 @@ def upload_file():
                                               'tmp', filename)
             img = Image.open(rcvd_file)
             img = img.convert('RGB')
-            prediction = model(transform(img).unsqueeze(0))
-            filename_pred =\
-                'prediction_{}.png'.format(filename.rsplit('.', 1)[0])
+            try:
+                prediction = model(transform(img).unsqueeze(0))
+            except:
+                prediction = img
+            filename_pred = 'prediction_{}.png'.format(
+                filename.rsplit('.', 1)[0])
             save_image(prediction,
                        os.path.join(app.config['RESPONSE_FOLDER'],
                                     filename_pred),
