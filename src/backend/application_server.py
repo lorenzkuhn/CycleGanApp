@@ -86,18 +86,21 @@ def upload_file():
             filename = secure_filename(rcvd_file.filename)
             uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                               'tmp', filename)
-            img = Image.open(rcvd_file)
-            img = img.convert('RGB')
             try:
+                img = Image.open(rcvd_file)
+                img = img.convert('RGB')
                 prediction = model(transform(img).unsqueeze(0))
+                filename_pred = 'prediction_{}.png'.format(
+                    filename.rsplit('.', 1)[0])
+                save_image(prediction,
+                           os.path.join(app.config['RESPONSE_FOLDER'],
+                                        filename_pred),
+                           normalize=True)
+
             except:
-                prediction = img
-            filename_pred = 'prediction_{}.png'.format(
-                filename.rsplit('.', 1)[0])
-            save_image(prediction,
-                       os.path.join(app.config['RESPONSE_FOLDER'],
-                                    filename_pred),
-                       normalize=True)
+                abort(404)
+                abort(Response('Improper image type.'))
+
 
             '''
             # attempt to create image object from output torch.
