@@ -55,10 +55,14 @@ def store_image(filename, uploaded_file):
     uploaded_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
 
-def start_save_image_thread(uploaded_file, ending):
+def start_save_image_thread(uploaded_file, filename):
     try:
-        filename = 'upload_{}_{}.{}'.format(time.strftime("%Y%m%d-%H%M%S"), random.randint(0,100000) ending)
+        filename = 'upload_{}_{}.{}'.format(time.strftime("%Y%m%d-%H%M%S"), 
+                                            random.randint(0,100000), 
+                                            extract_file_ending(filename))
         _thread.start_new_thread( store_image, (filename, uploaded_file, ) )
+    except:
+        app.logger.info("Failed to store file {}".format())
     
 
 def extract_file_ending(filename):
@@ -99,7 +103,7 @@ def upload_file():
             abort(404)
             return
 
-        start_save_image_thread(rcvd_file, extract_file_ending(rcvd_file.filename))
+        start_save_image_thread(rcvd_file, rcvd_file.filename)
 
         try:
             img = Image.open(rcvd_file)
