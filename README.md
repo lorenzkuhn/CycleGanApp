@@ -17,6 +17,10 @@ We used digitalocean to deploy our app in a docker container.
 
 2. `docker run --detach --mount source=logs,target=/persistentlogs --name application_server --publish 80:2375 --rm application_server:latest`
 
+### References
+https://docs.docker.com/storage/volumes/
+https://docs.nginx.com/nginx/admin-guide/monitoring/logging/
+
 ### Debugging Docker Container
 Given the container is currently running, follow these steps:
 1. Get id of container using command 'docker ps'
