@@ -21,8 +21,7 @@
         </section>
         <form>
           <div>
-            <input id='file_input' type="file" name="file" accept="image/png,
-            image/jpg, image/jpeg" required="true">
+            <input id='file_input' type="file" name="file" accept="image/*" required="true">
           </div>
         </form>
       </img-container>
@@ -33,17 +32,17 @@
       </img-container>
     </div>
     <script>
-        function handleErrors(response) {
+        const handleErrors = (response) => {
           if (!response.ok) {
               throw Error(response.statusText);
           }
           return response;
-        }
+        };
         // uploads an image file to the server,
         // fetches the inferred image and displays it
-        function upload(file) {
+        const upload = (file) => {
           const status = document.getElementById('status');
-          status.textContent = 'Uploading.'
+          status.textContent = 'Uploading...';
           document.getElementById('uploaded_image').src = URL.createObjectURL(
               file);
           const url = '/';
@@ -65,35 +64,38 @@
             .catch((error) => {
               console.log("Error occurred");
               console.log(error);
-              status.style.visibility = 'visible';
+              document.getElementById('uploaded_image').src = '';
               status.textContent = error;
             });
-        }
+        };
+
+        // Initialization.
         // sets up the app logic, declares required variables,
         // contains all the other functions
-        initialize = () => {
-          const input = document.getElementById('file_input');
-          const status = document.getElementById('status');
+        const input = document.getElementById('file_input');
+        const status = document.getElementById('status');
+
+        input.addEventListener('change', () => {
           document.getElementById('inferred_image').src = '';
           status.style.visibility = 'visible';
-          input.addEventListener('change', () => {
-            if (!input.files || !input.files[0]) {
-              status.textContent = 'Inappropriate file.';
-              return;
-            }
-            const file = input.files[0];
-            if (file.size > 50 * 1024 * 1024) {
-              status.textContent = 'File size too big.'
-            } else if (!file.type.startsWith('image/jpg') &&
-                       !file.type.startsWith('image/jpeg') &&
-                       !file.type.startsWith('image/png')) {
-              status.textContent = 'Inappropriate file type.';
-            } else {
-              upload(file);
-            }
-          }, false);
-        }
-        initialize();
+          if (!input.files || !input.files[0]) {
+            document.getElementById('uploaded_image').src = '';
+            status.textContent = 'Inappropriate file.';
+            return;
+          }
+          const file = input.files[0];
+          if (file.size > 50 * 1024 * 1024) {
+            document.getElementById('uploaded_image').src = '';
+            status.textContent = 'File size too big.';
+          } else if (!file.type.startsWith('image/jpg') &&
+                     !file.type.startsWith('image/jpeg') &&
+                     !file.type.startsWith('image/png')) {
+            document.getElementById('uploaded_image').src = '';
+            status.textContent = 'Inappropriate file type.';
+          } else {
+            upload(file);
+          }
+        }, false);
       </script>
       <!-- Global site tag (gtag.js) - Google Analytics -->
       <script async src="https://www.googletagmanager.com/gtag/js?id=UA-45266465-2"></script>
