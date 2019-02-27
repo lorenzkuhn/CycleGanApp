@@ -46,7 +46,7 @@
           status.textContent = 'Uploading.'
           document.getElementById('uploaded_image').src = URL.createObjectURL(
               file);
-          document.getElementById('inferred_imge').src = ''
+          document.getElementById('inferred_image').src = '';
           const url = '/';
           const data = new FormData();
           data.append('file', file);
