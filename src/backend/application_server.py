@@ -10,15 +10,15 @@ from werkzeug.utils import secure_filename
 import torch
 import torchvision.transforms as transforms
 from flask import Flask, flash, request, redirect, render_template,\
-                  send_from_directory, abort
-
+                  send_from_directory, abort, send_file
+import io
 from nn_modules import Generator
 from torchvision.utils import save_image
 import utils
 
 
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
-
+TARGET_IMAGE_SIZE = (3, 256, 256)
 app = Flask(__name__)
 #app.config.from_object('flask_configuration')
 app.config['UPLOAD_FOLDER'] = Path.cwd() / 'uploads/'
@@ -93,33 +93,27 @@ def upload_file():
             img = Image.open(rcvd_file)
             img = img.convert('RGB')
             prediction = model(transform(img).unsqueeze(0))
-            filename_pred = 'prediction_{}.png'.format(
-                filename.rsplit('.', 1)[0])
-            save_image(prediction,
-                       os.path.join(app.config['RESPONSE_FOLDER'],
-                                    filename_pred),
-                       normalize=True)
+            prediction = prediction.reshape(TARGET_IMAGE_SIZE)
+            return serve_pil_image(prediction)
 
         except:
             abort(404)
             return
-        '''
-        # attempt to create image object from output torch.
-        # Tensor, work in progress!
-        data = prediction.data.numpy()
-        new_img = transforms.ToPILImage(mode='RGB')(data)
-        np_image = np.squeeze(prediction.data.numpy(), axis=0)
-        np_image = np.transpose(np_image, (1, 2, 0))
-        new_img = Image.fromarray(np_image, 'RGB')
-        img_byte_arr = io.BytesIO()
-        new_img.save(img_byte_arr, format='PNG')
-        img_byte_arr = img_byte_arr.getvalue()
-        return send_file(io.BytesIO(img_byte_arr),
-                 attachment_filename='prediction.png',
-                 mimetype='image/png')'''
 
-        return send_from_directory(app.config['RESPONSE_FOLDER'],
-                                       filename_pred)
+
+def serve_pil_image(pil_img):
+    """
+    Returns inferred image to user without writing image to disk.
+    :param pil_img:
+    :return:
+    """
+    new_img = transforms.ToPILImage(mode='RGB')(pil_img)
+    img_byte_arr = io.BytesIO()
+    new_img.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+    return send_file(io.BytesIO(img_byte_arr),
+        attachment_filename='prediction.png',
+        mimetype='image/png')
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
