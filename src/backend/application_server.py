@@ -15,16 +15,17 @@ import io
 from nn_modules import Generator
 from torchvision.utils import save_image
 import utils
+import _thread
+import time
+import random
 
-
+random.seed()
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
 TARGET_IMAGE_SIZE = (3, 256, 256)
 app = Flask(__name__)
 #app.config.from_object('flask_configuration')
-app.config['UPLOAD_FOLDER'] = Path.cwd() / 'uploads/'
+app.config['UPLOAD_FOLDER'] = '/persistentlogs/uploads'
 Path(app.config['UPLOAD_FOLDER']).mkdir(exist_ok=True)
-app.config['RESPONSE_FOLDER'] = Path.cwd() / 'response/'
-Path(app.config['RESPONSE_FOLDER']).mkdir(exist_ok=True)
 
 # Set limit on file size of uploaded files. 50 * 1024 * 1024 is 50 MB.
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
@@ -50,6 +51,18 @@ def load_transform_function():
     image_size = (256, 256)
     transform = utils.get_transform(image_size)
 
+def store_image(filename, uploaded_file):
+    uploaded_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+
+def start_save_image_thread(uploaded_file, ending):
+    try:
+        filename = 'upload_{}_{}.{}'.format(time.strftime("%Y%m%d-%H%M%S"), random.randint(0,100000) ending)
+        _thread.start_new_thread( store_image, (filename, uploaded_file, ) )
+    
+
+def extract_file_ending(filename):
+    return filename.rsplit('.', 1)[1].lower()
 
 def is_allowed_file(filename):
     """
@@ -58,7 +71,7 @@ def is_allowed_file(filename):
     :return:
     """
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           extract_file_ending(filename) in ALLOWED_EXTENSIONS
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -86,9 +99,8 @@ def upload_file():
             abort(404)
             return
 
-        filename = secure_filename(rcvd_file.filename)
-        uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'],
-                                              'tmp', filename)
+        start_save_image_thread(rcvd_file, extract_file_ending(rcvd_file.filename))
+
         try:
             img = Image.open(rcvd_file)
             img = img.convert('RGB')
