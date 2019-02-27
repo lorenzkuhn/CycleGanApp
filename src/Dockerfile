@@ -27,7 +27,6 @@ RUN chown -R cyclegan:cyclegan /var/lib/nginx
 RUN chown -R cyclegan:cyclegan /run
 USER cyclegan
 
-# TODO: check if this works
-EXPOSE 2375
+EXPOSE 80
 
 ENTRYPOINT [ "/bin/bash", "-c", "nginx -c /home/cyclegan/nginx.conf & source activate onenv && ./boot.sh" ] 
