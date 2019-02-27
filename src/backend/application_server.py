@@ -117,7 +117,7 @@ def upload_file():
             return serve_pil_image(prediction)
 
         except Exception as e:
-            app.logger.error("Exception during inference: {} {}".format(e.message, e.args))
+            app.logger.error("Exception during inference: {}".format(e))
             abort(404)
             return
 
