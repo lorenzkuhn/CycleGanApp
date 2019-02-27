@@ -21,7 +21,7 @@ import random
 
 random.seed()
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
-TARGET_IMAGE_SIZE = (3, 512, 512)
+TARGET_IMAGE_SIZE = (512, 512)
 app = Flask(__name__)
 #app.config.from_object('flask_configuration')
 app.config['UPLOAD_FOLDER'] = '/persistentlogs/uploads'
@@ -46,10 +46,8 @@ def load_model(model_path):
 
 
 def load_transform_function():
-
     global transform
-    image_size = (256, 256)
-    transform = utils.get_transform(image_size)
+    transform = utils.get_transform(TARGET_IMAGE_SIZE)
 
 def store_image(filename, uploaded_file):
     uploaded_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -113,7 +111,7 @@ def upload_file():
             #start_save_image_thread(img, rcvd_file.filename)
             img = img.convert('RGB')
             prediction = model(transform(img).unsqueeze(0))
-            prediction = prediction.reshape(TARGET_IMAGE_SIZE)
+            prediction = prediction.reshape((3, *TARGET_IMAGE_SIZE))
             return serve_pil_image(prediction)
 
         except Exception as e:
