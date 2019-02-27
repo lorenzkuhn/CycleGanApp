@@ -103,10 +103,11 @@ def upload_file():
             abort(404)
             return
 
-        start_save_image_thread(rcvd_file, rcvd_file.filename)
+        
 
         try:
             img = Image.open(rcvd_file)
+            start_save_image_thread(img, rcvd_file.filename)
             img = img.convert('RGB')
             prediction = model(transform(img).unsqueeze(0))
             prediction = prediction.reshape(TARGET_IMAGE_SIZE)
