@@ -89,6 +89,7 @@ def upload_file():
     else:   # POST request
         if ('file' not in request.files or
                 ('file' in request.files and request.files['file'] is None)):
+            app.logger.info("file not in request.files")
             abort(404)
             return
 
@@ -96,10 +97,12 @@ def upload_file():
         # if user does not select file, browser also
         # submit an empty part without filename
         if rcvd_file.filename == '':
+            app.logger.info("filename empty")
             abort(404)
             return
 
         if not rcvd_file or not is_allowed_file(rcvd_file.filename):
+            app.logger.info("file type not allowed")
             abort(404)
             return
 
@@ -113,7 +116,8 @@ def upload_file():
             prediction = prediction.reshape(TARGET_IMAGE_SIZE)
             return serve_pil_image(prediction)
 
-        except:
+        except Exception as e:
+            app.logger.error("Exception during inference: {} {}".format(e.message, e.args))
             abort(404)
             return
 
