@@ -101,13 +101,15 @@ def upload_file():
             return
 
 
-def serve_pil_image(pil_img):
+def serve_pil_image(prediction):
     """
     Returns inferred image to user without writing image to disk.
     :param pil_img:
     :return:
     """
-    new_img = transforms.ToPILImage(mode='RGB')(pil_img)
+    prediction = prediction + torch.ones(list(TARGET_IMAGE_SIZE))
+    prediction = prediction / (2 * torch.ones(list(TARGET_IMAGE_SIZE)))
+    new_img = transforms.ToPILImage(mode='RGB')(prediction)
     img_byte_arr = io.BytesIO()
     new_img.save(img_byte_arr, format='PNG')
     img_byte_arr = img_byte_arr.getvalue()
