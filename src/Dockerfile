@@ -16,8 +16,6 @@ COPY backend/static/favicon.ico static/favicon.ico
 COPY learning/gpu_model gpu_model
 COPY learning/nn_modules.py nn_modules.py
 COPY learning/utils.py utils.py
-
-
 COPY backend/application_server.py boot.sh ./
 RUN chmod +x boot.sh
 
@@ -29,7 +27,7 @@ RUN chown -R cyclegan:cyclegan /var/lib/nginx
 RUN chown -R cyclegan:cyclegan /run
 USER cyclegan
 
-
-EXPOSE 80
+# TODO: check if this works
+EXPOSE 2375
 
 ENTRYPOINT [ "/bin/bash", "-c", "nginx -c /home/cyclegan/nginx.conf & source activate onenv && ./boot.sh" ] 

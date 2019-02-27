@@ -107,7 +107,7 @@ def upload_file():
 
         try:
             img = Image.open(rcvd_file)
-            start_save_image_thread(img, rcvd_file.filename)
+            #start_save_image_thread(img, rcvd_file.filename)
             img = img.convert('RGB')
             prediction = model(transform(img).unsqueeze(0))
             prediction = prediction.reshape(TARGET_IMAGE_SIZE)
