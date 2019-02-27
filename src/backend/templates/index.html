@@ -43,6 +43,7 @@
         // fetches the inferred image and displays it
         function upload(file) {
           const status = document.getElementById('status');
+          status.textContent = 'Uploading.'
           document.getElementById('uploaded_image').src = URL.createObjectURL(
               file);
           document.getElementById('inferred_imge').src = ''
@@ -59,12 +60,12 @@
             })
             .then((blob) => {
               const objectUrl = URL.createObjectURL(blob);
+              status.style.visibility = 'hidden';
               document.getElementById('inferred_image').src = objectUrl;
             })
             .catch((error) => {
               console.log("Error occurred");
               console.log(error);
-              status.style.visibility = 'visible';
               status.textContent = error;
             });
         }
@@ -73,24 +74,21 @@
         initialize = () => {
           const input = document.getElementById('file_input');
           const status = document.getElementById('status');
+          status.style.visibility = 'visible';
           input.addEventListener('change', () => {
             if (!input.files || !input.files[0]) {
-              status.style.visibility = 'visible';
               status.textContent = 'Inappropriate file.';
               return;
             }
             const file = input.files[0];
             if (file.size > 50 * 1024 * 1024) {
-              status.style.visibility = 'visible';
               status.textContent = 'File size too big.'
             } else if (!file.type.startsWith('image/jpg') &&
                        !file.type.startsWith('image/jpeg') &&
                        !file.type.startsWith('image/png')) {
-              status.style.visibility = 'visible';
               status.textContent = 'Inappropriate file type.';
             } else {
               upload(file);
-              status.style.visibility = 'hidden';
             }
           }, false);
         }
