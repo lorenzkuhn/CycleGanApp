@@ -21,7 +21,7 @@ import random
 
 random.seed()
 ALLOWED_EXTENSIONS = {'bmp', 'png', 'jpg', 'jpeg', 'ppm', 'pgm', 'tif'}
-TARGET_IMAGE_SIZE = (512, 512)
+TARGET_IMAGE_SIZE = (2048, 2048)
 app = Flask(__name__)
 #app.config.from_object('flask_configuration')
 app.config['UPLOAD_FOLDER'] = '/persistentlogs/uploads'
