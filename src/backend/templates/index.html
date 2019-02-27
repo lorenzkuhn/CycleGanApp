@@ -17,13 +17,14 @@
       <img-container>
         <section>
           <img id='uploaded_image' height='256' width='256'>
+          <div id='status'class="centered">Please upload a picture.</div>
         </section>
         <form>
           <div>
-            <input id='file_input' type="file" name="file" accept="image/*" required="true">
+            <input id='file_input' type="file" name="file" accept="image/png,
+            image/jpg, image/jpeg" required="true">
           </div>
         </form>
-        <div class='status_title'>Status: </div><div id='status_text'>Please select image to transform.</div>
       </img-container>
       <img-container>
         <section>
@@ -41,9 +42,10 @@
         // uploads an image file to the server,
         // fetches the inferred image and displays it
         function upload(file) {
-          const status_text = document.getElementById('status_text');
+          const status = document.getElementById('status');
           document.getElementById('uploaded_image').src = URL.createObjectURL(
               file);
+          document.getElementById('inferred_imge').src = ''
           const url = '/';
           const data = new FormData();
           data.append('file', file);
@@ -58,32 +60,37 @@
             .then((blob) => {
               const objectUrl = URL.createObjectURL(blob);
               document.getElementById('inferred_image').src = objectUrl;
-              status_text.textContent = 'Here you go. Feel free to upload ' +
-                  'another image.'
             })
             .catch((error) => {
-              console.log("error occurred");
+              console.log("Error occurred");
               console.log(error);
-              status_text.textContent = error;
+              status.style.visibility = 'visible';
+              status.textContent = error;
             });
         }
         // sets up the app logic, declares required variables,
         // contains all the other functions
         initialize = () => {
           const input = document.getElementById('file_input');
-          const statusText = document.getElementById('status_text');
+          const status = document.getElementById('status');
           input.addEventListener('change', () => {
             if (!input.files || !input.files[0]) {
-              statusText.textContent = 'No appropriate file chosen.'
+              status.style.visibility = 'visible';
+              status.textContent = 'Inappropriate file.';
               return;
             }
             const file = input.files[0];
             if (file.size > 50 * 1024 * 1024) {
-              statusText.textContent = 'File size too big.'
-            } else if (!file.type.startsWith("image/")) {
-              statusText.textContent = 'File not an image.'
+              status.style.visibility = 'visible';
+              status.textContent = 'File size too big.'
+            } else if (!file.type.startsWith('image/jpg') &&
+                       !file.type.startsWith('image/jpeg') &&
+                       !file.type.startsWith('image/png')) {
+              status.style.visibility = 'visible';
+              status.textContent = 'Inappropriate file type.';
             } else {
               upload(file);
+              status.style.visibility = 'hidden';
             }
           }, false);
         }
