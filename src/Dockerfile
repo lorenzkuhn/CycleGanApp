@@ -27,6 +27,7 @@ RUN chown -R cyclegan:cyclegan ./
 RUN chown -R cyclegan:cyclegan /var/log/nginx
 RUN chown -R cyclegan:cyclegan /var/lib/nginx
 RUN chown -R cyclegan:cyclegan /run
+RUN CHOWN -R cyclegan:cyclegan /persistentlogs
 USER cyclegan
 
 
