@@ -46,7 +46,6 @@
           status.textContent = 'Uploading.'
           document.getElementById('uploaded_image').src = URL.createObjectURL(
               file);
-          document.getElementById('inferred_image').src = '';
           const url = '/';
           const data = new FormData();
           data.append('file', file);
@@ -66,6 +65,7 @@
             .catch((error) => {
               console.log("Error occurred");
               console.log(error);
+              status.style.visibility = 'visible';
               status.textContent = error;
             });
         }
@@ -74,6 +74,7 @@
         initialize = () => {
           const input = document.getElementById('file_input');
           const status = document.getElementById('status');
+          document.getElementById('inferred_image').src = '';
           status.style.visibility = 'visible';
           input.addEventListener('change', () => {
             if (!input.files || !input.files[0]) {
