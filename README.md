@@ -51,4 +51,6 @@ $ flask run
 ```
 ## Training the CycleGAN model on Leonhard
 `bsub -W 80:00 -R "rusage[mem=11000,ngpus_excl_p=1]" "python cyclegan.py --batch_size 2 --n_epochs 150000"
+
+# test
 `
